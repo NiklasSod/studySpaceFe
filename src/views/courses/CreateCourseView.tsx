@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Container, Form, Button, Alert, Spinner } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
 import { createCourse } from '../../api/course'
+import RichTextEditor from '../../components/richText/RichTextEditor'
 
 export default function CreateCourseView() {
   const [name, setName] = useState('')
@@ -106,19 +107,10 @@ export default function CreateCourseView() {
               >
                 Description
               </Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                placeholder="Enter course description"
+              <RichTextEditor
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="py-2 px-3 shadow-none"
-                style={{
-                  borderRadius: '6px',
-                  backgroundColor: 'var(--input-bg)',
-                  color: 'var(--input-text)',
-                  borderColor: 'var(--input-border)',
-                }}
+                onChange={setDescription}
+                placeholder="Enter course description"
               />
             </Form.Group>
 

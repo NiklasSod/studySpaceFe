@@ -7,6 +7,7 @@ import {
 } from '../../api/assignment'
 import { getMineModules } from '../../api/module'
 import type { Assignment } from '../../types/assignment'
+import RichTextEditor from '../richText/RichTextEditor'
 
 interface AssignmentFormModalProps {
   show: boolean
@@ -168,12 +169,10 @@ export function AssignmentFormModal({
 
           <Form.Group className="mb-3" controlId="assignmentDescription">
             <Form.Label>Description</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={3}
-              placeholder="Enter assignment description"
+            <RichTextEditor
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={setDescription}
+              placeholder="Enter assignment description"
             />
           </Form.Group>
 

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap'
 import { createResource, updateResource } from '../../api/resource'
 import type { Resource } from '../../types/resource'
+import RichTextEditor from '../richText/RichTextEditor'
 
 interface ResourceFormModalProps {
   show: boolean
@@ -33,6 +34,7 @@ function ResourceFormModal({
 }: ResourceFormModalProps) {
   const [displayName, setDisplayName] = useState('')
   const [url, setUrl] = useState('')
+  const [description, setDescription] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
 
@@ -40,6 +42,7 @@ function ResourceFormModal({
     setError(null)
     setDisplayName(resource?.displayName ?? '')
     setUrl(resource?.url ?? '')
+    setDescription(resource?.description ?? '')
   }
 
   const handleHide = () => {
@@ -64,6 +67,7 @@ function ResourceFormModal({
         const created = await createResource({
           displayName: name,
           url: link,
+          description,
           courseId,
           moduleId,
           activityId,
@@ -73,6 +77,7 @@ function ResourceFormModal({
         const updated = await updateResource(resource.id, {
           displayName: name,
           url: link,
+          description,
         })
         onSaved(updated, 'edit')
       }
@@ -148,6 +153,20 @@ function ResourceFormModal({
             <Form.Text className="text-muted">
               A URL starting with https:// is recommended.
             </Form.Text>
+          </Form.Group>
+
+          <Form.Group className="mb-3" controlId="resourceDescription">
+            <Form.Label
+              className="fw-normal mb-1 small"
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              Description
+            </Form.Label>
+            <RichTextEditor
+              value={description}
+              onChange={setDescription}
+              placeholder="Add a short description"
+            />
           </Form.Group>
         </Modal.Body>
 
