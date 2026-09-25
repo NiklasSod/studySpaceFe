@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import type { Editor } from '@tiptap/react'
 import { Alert, Button, Form, ListGroup, Spinner } from 'react-bootstrap'
 import { BoxArrowUpRight } from 'react-bootstrap-icons'
 import { useAuth } from '../../auth/AuthContext'
@@ -10,8 +11,9 @@ import {
   updateResource,
 } from '../../api/resource'
 import type { Resource } from '../../types/resource'
-import RichText from '../richText/RichText'
+import ResourceDescription from '../richText/ResourceDescription'
 import RichTextEditor from '../richText/RichTextEditor'
+import VoiceRecorderButton from './VoiceRecorderButton'
 
 interface ActivityResourcesInlineProps {
   activityId: number
@@ -38,13 +40,19 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
   const [name, setName] = useState('')
   const [url, setUrl] = useState('')
   const [desc, setDesc] = useState('')
+  const [audioUrls, setAudioUrls] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
+
+  const editorRef = useRef<Editor | null>(null)
 
   const [editingId, setEditingId] = useState<number | null>(null)
   const [editName, setEditName] = useState('')
   const [editUrl, setEditUrl] = useState('')
   const [editDesc, setEditDesc] = useState('')
+  const [editAudioUrls, setEditAudioUrls] = useState<string[]>([])
+
+  const editEditorRef = useRef<Editor | null>(null)
 
   const [deleteId, setDeleteId] = useState<number | null>(null)
 
@@ -80,6 +88,7 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
     setName('')
     setUrl('')
     setDesc('')
+    setAudioUrls([])
     setFormError(null)
   }
 
@@ -97,6 +106,7 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
         displayName: name.trim(),
         url: link,
         description: desc,
+        ...(audioUrls.length > 0 ? { audioUrls } : {}),
         activityId,
       })
       setResources((prev) => [...prev, created])
@@ -104,6 +114,7 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
       setName('')
       setUrl('')
       setDesc('')
+      setAudioUrls([])
     } catch (err) {
       setFormError(
         err instanceof Error ? err.message : 'Could not add resource.',
@@ -118,6 +129,7 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
     setEditName(resource.displayName)
     setEditUrl(resource.url)
     setEditDesc(resource.description ?? '')
+    setEditAudioUrls(resource.audioUrls ?? [])
     setFormError(null)
   }
 
@@ -136,6 +148,7 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
         displayName: editName.trim(),
         url: link,
         description: editDesc,
+        audioUrls: editAudioUrls,
       })
       setResources((prev) =>
         prev.map((r) => (r.id === updated.id ? updated : r)),
@@ -160,6 +173,30 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
         err instanceof Error ? err.message : 'Could not delete resource.',
       )
     }
+  }
+
+  const handleAddAudioUploaded = (audioUrl: string) => {
+    const index = audioUrls.length
+    setAudioUrls((prev) => [...prev, audioUrl])
+    editorRef.current?.chain().focus().insertContent(`[[audio:${index}]]`).run()
+  }
+
+  const removeAddAudio = (index: number) => {
+    setAudioUrls((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  const handleEditAudioUploaded = (audioUrl: string) => {
+    const index = editAudioUrls.length
+    setEditAudioUrls((prev) => [...prev, audioUrl])
+    editEditorRef.current
+      ?.chain()
+      .focus()
+      .insertContent(`[[audio:${index}]]`)
+      .run()
+  }
+
+  const removeEditAudio = (index: number) => {
+    setEditAudioUrls((prev) => prev.filter((_, i) => i !== index))
   }
 
   if (loading) {
@@ -230,7 +267,42 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
                   onChange={setEditDesc}
                   placeholder="Description"
                   minHeight={90}
+                  editorRef={editEditorRef}
                 />
+                {isTeacher && (
+                  <>
+                    <VoiceRecorderButton
+                      onUploaded={handleEditAudioUploaded}
+                      disabled={saving}
+                    />
+                    {editAudioUrls.length > 0 && (
+                      <div className="d-flex flex-column gap-1 my-1">
+                        {editAudioUrls.map((audioUrl, index) => (
+                          <div
+                            key={audioUrl}
+                            className="d-flex align-items-center gap-2"
+                          >
+                            <audio
+                              controls
+                              preload="none"
+                              src={audioUrl}
+                              className="flex-grow-1"
+                            />
+                            <Button
+                              size="sm"
+                              variant="outline-danger"
+                              className="py-0 px-2"
+                              onClick={() => removeEditAudio(index)}
+                              title="Remove voice note"
+                            >
+                              ×
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
                 <div className="d-flex gap-2">
                   <Button
                     size="sm"
@@ -275,8 +347,9 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
                   />
                 </a>
                 {resource.description && (
-                  <RichText
+                  <ResourceDescription
                     html={resource.description}
+                    audioUrls={resource.audioUrls}
                     className="text-muted mt-1"
                   />
                 )}
@@ -348,7 +421,42 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
             onChange={setDesc}
             placeholder="Description"
             minHeight={90}
+            editorRef={editorRef}
           />
+          {isTeacher && (
+            <>
+              <VoiceRecorderButton
+                onUploaded={handleAddAudioUploaded}
+                disabled={saving}
+              />
+              {audioUrls.length > 0 && (
+                <div className="d-flex flex-column gap-1 my-1">
+                  {audioUrls.map((audioUrl, index) => (
+                    <div
+                      key={audioUrl}
+                      className="d-flex align-items-center gap-2"
+                    >
+                      <audio
+                        controls
+                        preload="none"
+                        src={audioUrl}
+                        className="flex-grow-1"
+                      />
+                      <Button
+                        size="sm"
+                        variant="outline-danger"
+                        className="py-0 px-2"
+                        onClick={() => removeAddAudio(index)}
+                        title="Remove voice note"
+                      >
+                        ×
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
           <div className="d-flex gap-2">
             <Button
               size="sm"

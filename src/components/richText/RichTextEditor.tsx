@@ -1,5 +1,5 @@
 import { useEffect, type ReactNode } from 'react'
-import { EditorContent, useEditor } from '@tiptap/react'
+import { EditorContent, useEditor, type Editor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
 import {
@@ -30,6 +30,7 @@ interface RichTextEditorProps {
   onChange: (html: string) => void
   placeholder?: string
   minHeight?: number
+  editorRef?: { current: Editor | null }
 }
 
 const FONT_SIZES = [
@@ -75,6 +76,7 @@ export default function RichTextEditor({
   onChange,
   placeholder,
   minHeight = 140,
+  editorRef,
 }: RichTextEditorProps) {
   const editor = useEditor({
     extensions: [
@@ -106,6 +108,14 @@ export default function RichTextEditor({
       editor.commands.setContent(next, { emitUpdate: false })
     }
   }, [editor, value])
+
+  useEffect(() => {
+    if (!editorRef) return
+    editorRef.current = editor
+    return () => {
+      editorRef.current = null
+    }
+  }, [editor, editorRef])
 
   if (!editor) {
     return <div className="rich-text-editor" style={{ minHeight }} />
