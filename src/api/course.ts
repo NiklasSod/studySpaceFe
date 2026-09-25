@@ -3,6 +3,7 @@ import { parseApiError } from '../utils/apiError'
 import type {
   CourseSummary,
   CourseDetail,
+  CourseEnrollment,
   CreateCourseRequest,
   UpdateCourseRequest,
 } from '../types/course'
@@ -46,6 +47,50 @@ export async function enrollInCourse(courseId: number): Promise<void> {
   if (!res.ok) {
     throw new Error(await parseApiError(res, 'Could not enroll in course.'))
   }
+}
+
+export async function getCourseEnrollments(
+  courseId: string | number,
+): Promise<CourseEnrollment[]> {
+  const res = await apiFetch(`/api/courses/${courseId}/enrollments`)
+  if (!res.ok) {
+    throw new Error(
+      await parseApiError(res, `Failed to fetch enrollments: ${res.status}`),
+    )
+  }
+  return res.json()
+}
+
+export async function approveEnrollment(
+  courseId: string | number,
+  userId: string,
+): Promise<CourseEnrollment> {
+  const res = await apiFetch(
+    `/api/courses/${courseId}/enrollments/${userId}/approve`,
+    { method: 'POST' },
+  )
+
+  if (!res.ok) {
+    throw new Error(await parseApiError(res, 'Could not approve enrollment.'))
+  }
+
+  return res.json()
+}
+
+export async function denyEnrollment(
+  courseId: string | number,
+  userId: string,
+): Promise<CourseEnrollment> {
+  const res = await apiFetch(
+    `/api/courses/${courseId}/enrollments/${userId}/deny`,
+    { method: 'POST' },
+  )
+
+  if (!res.ok) {
+    throw new Error(await parseApiError(res, 'Could not deny enrollment.'))
+  }
+
+  return res.json()
 }
 
 export async function createCourse(

@@ -25,6 +25,7 @@ export const CourseOverviewView: React.FC = () => {
   const [enrolled, setEnrolled] = useState<boolean>(true)
   const [enrolling, setEnrolling] = useState<boolean>(false)
   const [enrollError, setEnrollError] = useState<string | null>(null)
+  const [pendingApproval, setPendingApproval] = useState<boolean>(false)
 
   const { role, email, userId } = useAuth()
   const isStudent = role === 'student'
@@ -80,11 +81,14 @@ export const CourseOverviewView: React.FC = () => {
       setEnrolling(true)
       setEnrollError(null)
       await enrollInCourse(course.id)
-      setEnrolled(true)
+      setPendingApproval(true)
     } catch (err) {
-      setEnrollError(
-        err instanceof Error ? err.message : 'Could not enroll in course.',
-      )
+      const message =
+        err instanceof Error ? err.message : 'Could not enroll in course.'
+      setEnrollError(message)
+      if (/pending/i.test(message)) {
+        setPendingApproval(true)
+      }
     } finally {
       setEnrolling(false)
     }
@@ -135,7 +139,7 @@ export const CourseOverviewView: React.FC = () => {
             <h2 className="h5 fw-semibold mb-0">Course</h2>
           </div>
           <Card className="shadow-sm mb-4 position-relative">
-            {!enrolled && (
+            {pendingApproval ? (
               <Button
                 size="sm"
                 className="d-flex align-items-center gap-2 fw-medium"
@@ -148,16 +152,40 @@ export const CourseOverviewView: React.FC = () => {
                   borderColor: 'var(--btn-bg)',
                   borderRadius: '6px',
                 }}
-                onClick={handleEnroll}
-                disabled={enrolling}
+                disabled
               >
-                {enrolling ? 'Enrolling…' : 'Enroll in course'}
+                Pending approval
               </Button>
+            ) : (
+              !enrolled && (
+                <Button
+                  size="sm"
+                  className="d-flex align-items-center gap-2 fw-medium"
+                  style={{
+                    position: 'absolute',
+                    top: 8,
+                    right: 8,
+                    backgroundColor: 'var(--btn-bg)',
+                    color: 'var(--btn-text)',
+                    borderColor: 'var(--btn-bg)',
+                    borderRadius: '6px',
+                  }}
+                  onClick={handleEnroll}
+                  disabled={enrolling}
+                >
+                  {enrolling ? 'Enrolling…' : 'Enroll in course'}
+                </Button>
+              )
             )}
             <Card.Body>
               <Card.Title className={`h3 mb-2 ${!enrolled ? 'pe-5' : ''}`}>
                 {course.name}
               </Card.Title>
+              {pendingApproval && (
+                <Alert variant="info" className="py-2">
+                  Your enrollment request is pending teacher approval.
+                </Alert>
+              )}
               {enrollError && (
                 <Alert variant="danger" className="py-2">
                   {enrollError}
