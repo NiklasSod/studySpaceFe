@@ -15,6 +15,7 @@ export interface CourseEnrollment {
   lastName: string
   email: string
   role: string
+  status?: string
 }
 
 export interface Course extends CourseSummary {
@@ -39,5 +40,3 @@ export interface UpdateCourseRequest {
   startDate?: string | null
   endDate?: string | null
 }
-
-

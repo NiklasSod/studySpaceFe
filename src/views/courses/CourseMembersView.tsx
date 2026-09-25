@@ -8,17 +8,33 @@ import {
   Row,
   Col,
   Spinner,
+  Button,
+  Badge,
 } from 'react-bootstrap'
-import { getCourseById } from '../../api/course'
+import { CheckLg, XLg } from 'react-bootstrap-icons'
+import {
+  getCourseById,
+  getCourseEnrollments,
+  approveEnrollment,
+  denyEnrollment,
+} from '../../api/course'
 import type { CourseDetail, CourseEnrollment } from '../../types/course'
+import {
+  normalizeEnrollmentStatus,
+  enrollmentStatusBadgeBg,
+  enrollmentStatusLabel,
+} from '../../utils/enrollmentStatus'
 import { useAuth } from '../../auth/AuthContext'
 import { useEditMode } from '../../editMode/EditModeContext'
 
 function CourseMembersView() {
   const { courseId } = useParams<{ courseId: string }>()
   const [course, setCourse] = useState<CourseDetail | undefined>(undefined)
+  const [enrollments, setEnrollments] = useState<CourseEnrollment[]>([])
   const [loading, setLoading] = useState(() => courseId !== undefined)
   const [error, setError] = useState<string | null>(null)
+  const [actionError, setActionError] = useState<string | null>(null)
+  const [busyUserId, setBusyUserId] = useState<string | null>(null)
 
   const navigate = useNavigate()
   const { role } = useAuth()
@@ -35,13 +51,61 @@ function CourseMembersView() {
       return
     }
 
-    getCourseById(courseId)
-      .then(setCourse)
-      .catch((err: unknown) =>
-        setError(err instanceof Error ? err.message : 'Failed to load course.'),
+    const id = courseId
+    let ignore = false
+
+    async function loadMembers() {
+      try {
+        const courseData = await getCourseById(id)
+        if (ignore) return
+        setCourse(courseData)
+
+        if (isStudent) {
+          setEnrollments(courseData.enrollments)
+        } else {
+          const records = await getCourseEnrollments(id)
+          if (ignore) return
+          setEnrollments(records)
+        }
+      } catch (err: unknown) {
+        if (!ignore) {
+          setError(
+            err instanceof Error ? err.message : 'Failed to load course.',
+          )
+        }
+      } finally {
+        if (!ignore) setLoading(false)
+      }
+    }
+
+    loadMembers()
+
+    return () => {
+      ignore = true
+    }
+  }, [courseId, isStudent])
+
+  const handleDecide = async (userId: string, approve: boolean) => {
+    if (!courseId) return
+    setBusyUserId(userId)
+    setActionError(null)
+    try {
+      const updated = approve
+        ? await approveEnrollment(courseId, userId)
+        : await denyEnrollment(courseId, userId)
+      setEnrollments((prev) =>
+        prev.map((enrollment) =>
+          enrollment.userId === userId ? updated : enrollment,
+        ),
       )
-      .finally(() => setLoading(false))
-  }, [courseId])
+    } catch (err: unknown) {
+      setActionError(
+        err instanceof Error ? err.message : 'Could not update enrollment.',
+      )
+    } finally {
+      setBusyUserId(null)
+    }
+  }
 
   if (loading) {
     return (
@@ -69,19 +133,75 @@ function CourseMembersView() {
     )
   }
 
-  const teachers = course.enrollments.filter((e) => e.role === 'Teacher')
-  const students = course.enrollments.filter((e) => e.role === 'Student')
+  const teachers = enrollments.filter((e) => e.role === 'Teacher')
+  const approvedStudents = enrollments.filter(
+    (e) =>
+      e.role === 'Student' &&
+      normalizeEnrollmentStatus(e.status) === 'approved',
+  )
+  const pendingStudents = enrollments.filter(
+    (e) =>
+      e.role === 'Student' && normalizeEnrollmentStatus(e.status) === 'pending',
+  )
+  const deniedStudents = enrollments.filter(
+    (e) =>
+      e.role === 'Student' && normalizeEnrollmentStatus(e.status) === 'denied',
+  )
 
-  const renderMember = (member: CourseEnrollment) => (
+  const renderMember = (member: CourseEnrollment, showStatus = false) => (
     <ListGroup.Item
       key={member.userId}
       action
       onClick={() => handleMemberClick(member.userId)}
+      className="d-flex justify-content-between align-items-center gap-2"
     >
-      <div className="fw-semibold">
-        {member.firstName} {member.lastName}
+      <div className="flex-grow-1">
+        <div className="fw-semibold">
+          {member.firstName} {member.lastName}
+        </div>
+        <div className="text-muted">{member.email}</div>
       </div>
-      <div className="text-muted">{member.email}</div>
+      {showStatus && (
+        <Badge bg={enrollmentStatusBadgeBg(member.status)}>
+          {enrollmentStatusLabel(member.status)}
+        </Badge>
+      )}
+    </ListGroup.Item>
+  )
+
+  const renderRequest = (member: CourseEnrollment) => (
+    <ListGroup.Item
+      key={member.userId}
+      className="d-flex justify-content-between align-items-center gap-2"
+    >
+      <div className="flex-grow-1">
+        <div className="fw-semibold">
+          {member.firstName} {member.lastName}
+        </div>
+        <div className="text-muted">{member.email}</div>
+      </div>
+      <div className="d-flex gap-2">
+        <Button
+          variant="success"
+          size="sm"
+          title={`Approve ${member.firstName} ${member.lastName}`}
+          aria-label={`Approve ${member.firstName} ${member.lastName}`}
+          onClick={() => handleDecide(member.userId, true)}
+          disabled={busyUserId === member.userId}
+        >
+          <CheckLg /> Approve
+        </Button>
+        <Button
+          variant="outline-danger"
+          size="sm"
+          title={`Deny ${member.firstName} ${member.lastName}`}
+          aria-label={`Deny ${member.firstName} ${member.lastName}`}
+          onClick={() => handleDecide(member.userId, false)}
+          disabled={busyUserId === member.userId}
+        >
+          <XLg /> Deny
+        </Button>
+      </div>
     </ListGroup.Item>
   )
 
@@ -120,6 +240,24 @@ function CourseMembersView() {
               </Link>
             )}
           </div>
+
+          {actionError && (
+            <Alert variant="danger" className="py-2">
+              {actionError}
+            </Alert>
+          )}
+
+          {!isStudent && pendingStudents.length > 0 && (
+            <>
+              <h3 className="h6 fw-semibold text-muted text-uppercase mb-2">
+                Enrollment requests
+              </h3>
+              <ListGroup className="mb-3">
+                {pendingStudents.map(renderRequest)}
+              </ListGroup>
+            </>
+          )}
+
           <ListGroup>
             <ListGroup.Item variant="secondary" className="fw-semibold">
               Teachers
@@ -129,7 +267,7 @@ function CourseMembersView() {
                 No teachers listed.
               </ListGroup.Item>
             ) : (
-              teachers.map(renderMember)
+              teachers.map((member) => renderMember(member))
             )}
           </ListGroup>
 
@@ -137,14 +275,23 @@ function CourseMembersView() {
             <ListGroup.Item variant="secondary" className="fw-semibold">
               Students
             </ListGroup.Item>
-            {students.length === 0 ? (
+            {approvedStudents.length === 0 ? (
               <ListGroup.Item className="text-muted">
                 No students enrolled.
               </ListGroup.Item>
             ) : (
-              students.map(renderMember)
+              approvedStudents.map((member) => renderMember(member, !isStudent))
             )}
           </ListGroup>
+
+          {!isStudent && deniedStudents.length > 0 && (
+            <ListGroup className="mt-3">
+              <ListGroup.Item variant="secondary" className="fw-semibold">
+                Denied requests
+              </ListGroup.Item>
+              {deniedStudents.map((member) => renderMember(member, true))}
+            </ListGroup>
+          )}
         </Col>
       </Row>
     </Container>

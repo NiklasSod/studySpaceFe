@@ -31,6 +31,7 @@ export const CourseModulesView: React.FC = () => {
   const [notEnrolled, setNotEnrolled] = useState<boolean>(false)
   const [enrolling, setEnrolling] = useState<boolean>(false)
   const [enrollError, setEnrollError] = useState<string | null>(null)
+  const [pendingApproval, setPendingApproval] = useState<boolean>(false)
   const [showAddModule, setShowAddModule] = useState<boolean>(false)
 
   const { role } = useAuth()
@@ -90,13 +91,15 @@ export const CourseModulesView: React.FC = () => {
       setEnrolling(true)
       setEnrollError(null)
       await enrollInCourse(Number(courseId))
-      const courseModules = await getModulesByCourse(Number(courseId))
-      setModules(courseModules)
+      setPendingApproval(true)
       setNotEnrolled(false)
     } catch (err) {
-      setEnrollError(
-        err instanceof Error ? err.message : 'Could not enroll in course.',
-      )
+      const message =
+        err instanceof Error ? err.message : 'Could not enroll in course.'
+      setEnrollError(message)
+      if (/pending/i.test(message)) {
+        setPendingApproval(true)
+      }
     } finally {
       setEnrolling(false)
     }
@@ -155,7 +158,18 @@ export const CourseModulesView: React.FC = () => {
               </Button>
             )}
           </div>
-          {notEnrolled ? (
+          {pendingApproval ? (
+            <Alert variant="info">
+              <p className="mb-2">
+                Your enrollment request is pending teacher approval.
+              </p>
+              {enrollError && (
+                <Alert variant="danger" className="py-2">
+                  {enrollError}
+                </Alert>
+              )}
+            </Alert>
+          ) : notEnrolled ? (
             <Alert variant="info">
               <p className="mb-2">You are not enrolled in this course.</p>
               {enrollError && (
