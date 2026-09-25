@@ -20,6 +20,8 @@ import {
 import type { Activity } from '../../types/activity'
 import ResourcesSection from '../resources/ResourcesSection'
 import ActivityResourcesInline from '../resources/ActivityResourcesInline'
+import RichText from '../richText/RichText'
+import RichTextEditor from '../richText/RichTextEditor'
 
 interface ModuleActivitiesListProps {
   moduleId: number
@@ -256,9 +258,10 @@ export function ModuleActivitiesList({ moduleId }: ModuleActivitiesListProps) {
             <div>
               <div className="fw-semibold small">{nextActivity.name}</div>
               {nextActivity.description && (
-                <div className="text-muted small">
-                  {nextActivity.description}
-                </div>
+                <RichText
+                  html={nextActivity.description}
+                  className="text-muted small"
+                />
               )}
               <div className="text-muted small mt-1">
                 {formatActivityDate(nextActivity)}
@@ -300,9 +303,10 @@ export function ModuleActivitiesList({ moduleId }: ModuleActivitiesListProps) {
                   <div>
                     <div className="fw-semibold">{act.name}</div>
                     {act.description && (
-                      <div className="text-muted small my-1">
-                        {act.description}
-                      </div>
+                      <RichText
+                        html={act.description}
+                        className="text-muted small my-1"
+                      />
                     )}
                     <div className="text-muted small">
                       {formatActivityDate(act)}
@@ -379,12 +383,10 @@ export function ModuleActivitiesList({ moduleId }: ModuleActivitiesListProps) {
             </Form.Group>
             <Form.Group className="mb-3" controlId="actDesc">
               <Form.Label>Description</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={2}
+              <RichTextEditor
                 value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
+                onChange={(description) =>
+                  setFormData({ ...formData, description })
                 }
               />
             </Form.Group>

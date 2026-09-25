@@ -14,6 +14,7 @@ import { getMineActivities, getAllActivities } from '../../api/activity'
 import type { Activity } from '../../types/activity'
 import PaginationControls from '../../components/PaginationControls'
 import ActivityResourcesInline from '../../components/resources/ActivityResourcesInline'
+import RichText from '../../components/richText/RichText'
 
 function formatActivityDate(act: Activity) {
   const startDateObj = act.startDate ? new Date(act.startDate) : null
@@ -236,9 +237,10 @@ export const ActivitiesView: React.FC = () => {
                   )}
                 </div>
                 {activity.description && (
-                  <Card.Text className="text-muted small mb-3">
-                    {activity.description}
-                  </Card.Text>
+                  <RichText
+                    html={activity.description}
+                    className="text-muted small mb-3"
+                  />
                 )}
                 <ActivityResourcesInline activityId={activity.id} />
                 <Card.Text className="text-muted small mb-0 mt-auto">
@@ -368,9 +370,10 @@ export const ActivitiesView: React.FC = () => {
                           )}
                         </div>
                         {activity.description && (
-                          <Card.Text className="text-muted small mb-3">
-                            {activity.description}
-                          </Card.Text>
+                          <RichText
+                            html={activity.description}
+                            className="text-muted small mb-3"
+                          />
                         )}
                         <ActivityResourcesInline activityId={activity.id} />
                         <Card.Text className="text-muted small mb-0 mt-auto">
