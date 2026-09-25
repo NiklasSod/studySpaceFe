@@ -13,7 +13,7 @@ import {
 import type { Resource } from '../../types/resource'
 import ResourceFormModal from './ResourceFormModal'
 import ConfirmModal from '../ConfirmModal'
-import RichText from '../richText/RichText'
+import ResourceDescription from '../richText/ResourceDescription'
 
 interface ResourcesSectionProps {
   courseId?: number
@@ -176,8 +176,9 @@ function ResourcesSection({
                     <BoxArrowUpRight size={12} className="flex-shrink-0" />
                   </a>
                   {resource.description && (
-                    <RichText
+                    <ResourceDescription
                       html={resource.description}
+                      audioUrls={resource.audioUrls}
                       className="text-muted small"
                     />
                   )}
@@ -237,8 +238,9 @@ function ResourcesSection({
                     <BoxArrowUpRight size={12} className="flex-shrink-0" />
                   </a>
                   {resource.description && (
-                    <RichText
+                    <ResourceDescription
                       html={resource.description}
+                      audioUrls={resource.audioUrls}
                       className="text-muted small"
                     />
                   )}

@@ -1,8 +1,11 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import type { Editor } from '@tiptap/react'
 import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap'
 import { createResource, updateResource } from '../../api/resource'
 import type { Resource } from '../../types/resource'
+import { useAuth } from '../../auth/AuthContext'
 import RichTextEditor from '../richText/RichTextEditor'
+import VoiceRecorderButton from './VoiceRecorderButton'
 
 interface ResourceFormModalProps {
   show: boolean
@@ -35,19 +38,36 @@ function ResourceFormModal({
   const [displayName, setDisplayName] = useState('')
   const [url, setUrl] = useState('')
   const [description, setDescription] = useState('')
+  const [audioUrls, setAudioUrls] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+
+  const editorRef = useRef<Editor | null>(null)
+
+  const { role } = useAuth()
+  const canRecord = role !== 'student'
 
   const handleShow = () => {
     setError(null)
     setDisplayName(resource?.displayName ?? '')
     setUrl(resource?.url ?? '')
     setDescription(resource?.description ?? '')
+    setAudioUrls(resource?.audioUrls ?? [])
   }
 
   const handleHide = () => {
     setError(null)
     onHide()
+  }
+
+  const handleAudioUploaded = (audioUrl: string) => {
+    const index = audioUrls.length
+    setAudioUrls((prev) => [...prev, audioUrl])
+    editorRef.current?.chain().focus().insertContent(`[[audio:${index}]]`).run()
+  }
+
+  const removeAudio = (index: number) => {
+    setAudioUrls((prev) => prev.filter((_, i) => i !== index))
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -68,6 +88,7 @@ function ResourceFormModal({
           displayName: name,
           url: link,
           description,
+          ...(audioUrls.length > 0 ? { audioUrls } : {}),
           courseId,
           moduleId,
           activityId,
@@ -78,6 +99,7 @@ function ResourceFormModal({
           displayName: name,
           url: link,
           description,
+          audioUrls,
         })
         onSaved(updated, 'edit')
       }
@@ -166,8 +188,49 @@ function ResourceFormModal({
               value={description}
               onChange={setDescription}
               placeholder="Add a short description"
+              editorRef={editorRef}
             />
           </Form.Group>
+
+          {canRecord && (
+            <Form.Group className="mb-3" controlId="resourceAudio">
+              <Form.Label
+                className="fw-normal mb-1 small"
+                style={{ color: 'var(--text-secondary)' }}
+              >
+                Voice notes
+              </Form.Label>
+              <VoiceRecorderButton
+                onUploaded={handleAudioUploaded}
+                disabled={saving}
+              />
+              {audioUrls.length > 0 && (
+                <div className="d-flex flex-column gap-1 mt-2">
+                  {audioUrls.map((audioUrl, index) => (
+                    <div
+                      key={audioUrl}
+                      className="d-flex align-items-center gap-2"
+                    >
+                      <audio
+                        controls
+                        preload="none"
+                        src={audioUrl}
+                        className="flex-grow-1"
+                      />
+                      <Button
+                        variant="outline-danger"
+                        size="sm"
+                        onClick={() => removeAudio(index)}
+                        title="Remove voice note"
+                      >
+                        ×
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Form.Group>
+          )}
         </Modal.Body>
 
         <Modal.Footer>

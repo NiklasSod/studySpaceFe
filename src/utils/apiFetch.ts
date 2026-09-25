@@ -7,11 +7,13 @@ export async function apiFetch(
 ): Promise<Response> {
   const doFetch = () => {
     const token = getAccessToken()
+    const isFormData =
+      typeof FormData !== 'undefined' && options.body instanceof FormData
     return fetch(path, {
       ...options,
       credentials: 'include',
       headers: {
-        'Content-Type': 'application/json',
+        ...(!isFormData ? { 'Content-Type': 'application/json' } : {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...options.headers,
       },
