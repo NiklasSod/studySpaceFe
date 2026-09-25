@@ -7,6 +7,8 @@ import { deleteModule, updateModule } from '../../api/module'
 import type { CourseModule } from '../../types/module'
 import ModuleActivitiesList from './ModuleActivitiesList'
 import ResourcesSection from '../resources/ResourcesSection'
+import RichText from '../richText/RichText'
+import RichTextEditor from '../richText/RichTextEditor'
 
 interface ModuleCardProps {
   module: CourseModule
@@ -121,9 +123,10 @@ function ModuleCard({ module, onEdit, onDelete }: ModuleCardProps) {
             </Button>
           )}
           <Card.Title className="h5 pe-5">{moduleData.name}</Card.Title>
-          <Card.Text className="text-muted small pe-5">
-            {moduleData.description}
-          </Card.Text>
+          <RichText
+            html={moduleData.description}
+            className="text-muted small pe-5"
+          />
           <Card.Text className="text-muted small mb-0 pe-5">
             {new Date(moduleData.startDate).toLocaleDateString()} -{' '}
             {new Date(moduleData.endDate).toLocaleDateString()}
@@ -213,15 +216,10 @@ function ModuleCard({ module, onEdit, onDelete }: ModuleCardProps) {
             </Form.Group>
             <Form.Group className="mb-3" controlId="editModuleDescription">
               <Form.Label>Description</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
+              <RichTextEditor
                 value={editForm.description}
-                onChange={(e) =>
-                  setEditForm((prev) => ({
-                    ...prev,
-                    description: e.target.value,
-                  }))
+                onChange={(description) =>
+                  setEditForm((prev) => ({ ...prev, description }))
                 }
               />
             </Form.Group>

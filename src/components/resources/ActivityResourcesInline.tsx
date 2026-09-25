@@ -10,6 +10,8 @@ import {
   updateResource,
 } from '../../api/resource'
 import type { Resource } from '../../types/resource'
+import RichText from '../richText/RichText'
+import RichTextEditor from '../richText/RichTextEditor'
 
 interface ActivityResourcesInlineProps {
   activityId: number
@@ -35,12 +37,14 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
   const [adding, setAdding] = useState(false)
   const [name, setName] = useState('')
   const [url, setUrl] = useState('')
+  const [desc, setDesc] = useState('')
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
 
   const [editingId, setEditingId] = useState<number | null>(null)
   const [editName, setEditName] = useState('')
   const [editUrl, setEditUrl] = useState('')
+  const [editDesc, setEditDesc] = useState('')
 
   const [deleteId, setDeleteId] = useState<number | null>(null)
 
@@ -75,6 +79,7 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
     setAdding(true)
     setName('')
     setUrl('')
+    setDesc('')
     setFormError(null)
   }
 
@@ -91,12 +96,14 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
       const created = await createResource({
         displayName: name.trim(),
         url: link,
+        description: desc,
         activityId,
       })
       setResources((prev) => [...prev, created])
       setAdding(false)
       setName('')
       setUrl('')
+      setDesc('')
     } catch (err) {
       setFormError(
         err instanceof Error ? err.message : 'Could not add resource.',
@@ -110,6 +117,7 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
     setEditingId(resource.id)
     setEditName(resource.displayName)
     setEditUrl(resource.url)
+    setEditDesc(resource.description ?? '')
     setFormError(null)
   }
 
@@ -127,6 +135,7 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
       const updated = await updateResource(editingId, {
         displayName: editName.trim(),
         url: link,
+        description: editDesc,
       })
       setResources((prev) =>
         prev.map((r) => (r.id === updated.id ? updated : r)),
@@ -216,6 +225,12 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
                   className="mb-1"
                   placeholder="https://…"
                 />
+                <RichTextEditor
+                  value={editDesc}
+                  onChange={setEditDesc}
+                  placeholder="Description"
+                  minHeight={90}
+                />
                 <div className="d-flex gap-2">
                   <Button
                     size="sm"
@@ -259,6 +274,12 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
                     style={{ width: 10, height: 10, flexShrink: 0 }}
                   />
                 </a>
+                {resource.description && (
+                  <RichText
+                    html={resource.description}
+                    className="text-muted mt-1"
+                  />
+                )}
               </div>
               {isOwner && (
                 <div className="d-flex gap-2 flex-shrink-0">
@@ -321,6 +342,12 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
             onChange={(e) => setUrl(e.target.value)}
             className="mb-1"
             placeholder="https://…"
+          />
+          <RichTextEditor
+            value={desc}
+            onChange={setDesc}
+            placeholder="Description"
+            minHeight={90}
           />
           <div className="d-flex gap-2">
             <Button

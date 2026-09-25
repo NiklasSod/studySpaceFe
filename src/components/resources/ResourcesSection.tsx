@@ -13,6 +13,7 @@ import {
 import type { Resource } from '../../types/resource'
 import ResourceFormModal from './ResourceFormModal'
 import ConfirmModal from '../ConfirmModal'
+import RichText from '../richText/RichText'
 
 interface ResourcesSectionProps {
   courseId?: number
@@ -174,6 +175,12 @@ function ResourcesSection({
                     <span className="text-break">{resource.displayName}</span>
                     <BoxArrowUpRight size={12} className="flex-shrink-0" />
                   </a>
+                  {resource.description && (
+                    <RichText
+                      html={resource.description}
+                      className="text-muted small"
+                    />
+                  )}
                   <div className="text-muted small mt-1">
                     Added {new Date(resource.uploadDate).toLocaleDateString()}
                   </div>
@@ -229,6 +236,12 @@ function ResourcesSection({
                     <span className="text-break">{resource.displayName}</span>
                     <BoxArrowUpRight size={12} className="flex-shrink-0" />
                   </a>
+                  {resource.description && (
+                    <RichText
+                      html={resource.description}
+                      className="text-muted small"
+                    />
+                  )}
                   <div className="text-muted small mt-1">
                     Added {new Date(resource.uploadDate).toLocaleDateString()}
                   </div>

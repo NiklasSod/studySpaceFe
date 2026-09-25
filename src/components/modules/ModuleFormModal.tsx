@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap'
 import { addModule } from '../../api/module'
 import type { CourseModule } from '../../types/module'
+import RichTextEditor from '../richText/RichTextEditor'
 
 interface ModuleFormModalProps {
   courseId: number
@@ -114,19 +115,10 @@ function ModuleFormModal({
             >
               Description
             </Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={3}
-              placeholder="Enter module description"
+            <RichTextEditor
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="py-2 px-3 shadow-none"
-              style={{
-                borderRadius: '6px',
-                backgroundColor: 'var(--input-bg)',
-                color: 'var(--input-text)',
-                borderColor: 'var(--input-border)',
-              }}
+              onChange={setDescription}
+              placeholder="Enter module description"
             />
           </Form.Group>
 

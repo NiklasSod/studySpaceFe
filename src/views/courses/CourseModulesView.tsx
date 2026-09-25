@@ -19,6 +19,7 @@ import type { CourseModule } from '../../types/module'
 import ModuleFormModal from '../../components/modules/ModuleFormModal'
 import ModuleActivitiesList from '../../components/modules/ModuleActivitiesList'
 import ResourcesSection from '../../components/resources/ResourcesSection'
+import RichText from '../../components/richText/RichText'
 
 export const CourseModulesView: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>()
@@ -177,7 +178,10 @@ export const CourseModulesView: React.FC = () => {
                 modules.map((module) => (
                   <ListGroup.Item key={module.id} className="py-3 border">
                     <div className="fw-semibold">{module.name}</div>
-                    <div className="text-muted small">{module.description}</div>
+                    <RichText
+                      html={module.description}
+                      className="text-muted small"
+                    />
                     <div className="text-muted small mt-1">
                       {new Date(module.startDate).toLocaleDateString()} -{' '}
                       {new Date(module.endDate).toLocaleDateString()}
