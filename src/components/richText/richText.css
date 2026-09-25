@@ -1,0 +1,123 @@
+.rich-text-editor {
+  border: 1px solid var(--input-border);
+  border-radius: 6px;
+  background-color: var(--input-bg);
+}
+
+.rich-text-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  padding: 6px;
+  border-bottom: 1px solid var(--input-border);
+}
+
+.rich-text-toolbar .btn.rich-text-toolbar-btn {
+  color: var(--input-text);
+  border-color: var(--input-border);
+  background-color: transparent;
+}
+
+.rich-text-toolbar .btn.rich-text-toolbar-btn:hover,
+.rich-text-toolbar .btn.rich-text-toolbar-btn:focus {
+  background-color: var(--bs-tertiary-bg);
+  color: var(--input-text);
+}
+
+.rich-text-toolbar .btn.rich-text-toolbar-btn.active {
+  background-color: var(--bs-primary);
+  border-color: var(--bs-primary);
+  color: #ffffff;
+}
+
+.rich-text-content {
+  min-height: 140px;
+  padding: 0.75rem 1rem;
+  color: var(--input-text);
+  outline: none;
+}
+
+.rich-text-content:focus {
+  outline: none;
+}
+
+.rich-text-content p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+  color: var(--text-secondary);
+}
+
+.rich-text-content p,
+.rich-text-display p {
+  margin: 0 0 0.5rem;
+}
+
+.rich-text-content > *:first-child,
+.rich-text-display > *:first-child {
+  margin-top: 0;
+}
+
+.rich-text-content > *:last-child,
+.rich-text-display > *:last-child {
+  margin-bottom: 0;
+}
+
+.rich-text-content h1,
+.rich-text-display h1 {
+  font-size: 1.5rem;
+}
+
+.rich-text-content h2,
+.rich-text-display h2 {
+  font-size: 1.25rem;
+}
+
+.rich-text-content h3,
+.rich-text-display h3 {
+  font-size: 1.125rem;
+}
+
+.rich-text-content h4,
+.rich-text-display h4 {
+  font-size: 1rem;
+}
+
+.rich-text-content ul,
+.rich-text-content ol,
+.rich-text-display ul,
+.rich-text-display ol {
+  padding-left: 1.25rem;
+}
+
+.rich-text-clamped p,
+.rich-text-clamped ul,
+.rich-text-clamped ol {
+  margin: 0;
+}
+
+.rich-text-size-select {
+  width: auto;
+  min-width: 110px;
+  color: var(--input-text);
+  background-color: var(--input-bg);
+  border-color: var(--input-border);
+}
+
+.rich-text-color-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.rich-text-color-input {
+  width: 31px;
+  height: 31px;
+  padding: 2px;
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+  background-color: transparent;
+  cursor: pointer;
+}

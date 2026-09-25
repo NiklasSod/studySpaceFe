@@ -14,6 +14,7 @@ import { getCourseById, enrollInCourse } from '../../api/course'
 import { useAuth } from '../../auth/AuthContext'
 import type { CourseDetail } from '../../types/course'
 import ResourcesSection from '../../components/resources/ResourcesSection'
+import RichText from '../../components/richText/RichText'
 
 export const CourseOverviewView: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>()
@@ -166,7 +167,7 @@ export const CourseOverviewView: React.FC = () => {
                 {new Date(course.startDate).toLocaleDateString()} -{' '}
                 {new Date(course.endDate).toLocaleDateString()}
               </Card.Text>
-              <Card.Text>{course.description}</Card.Text>
+              <RichText html={course.description} className="card-text" />
             </Card.Body>
           </Card>
 
