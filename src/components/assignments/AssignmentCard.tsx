@@ -15,6 +15,7 @@ import AssignmentSubmissionsList from './AssignmentSubmissionsList'
 import { AssignmentFormModal } from './AssignmentFormModal'
 import { DeleteAssignmentModal } from './DeleteAssignmentModal'
 import ViewSubmissionModal from './ViewSubmissionModal'
+import RichText from '../richText/RichText'
 
 interface AssignmentCardProps {
   assignment: Assignment
@@ -105,9 +106,10 @@ function AssignmentCard({
           </div>
 
           {assignment.description && (
-            <Card.Text className="text-muted small pe-5 mb-2">
-              {assignment.description}
-            </Card.Text>
+            <RichText
+              html={assignment.description}
+              className="text-muted small pe-5 mb-2"
+            />
           )}
 
           <Card.Text className="text-muted small mb-3">

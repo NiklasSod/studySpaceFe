@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import type { CourseSummary } from '../../types/course'
 import { useEditMode } from '../../editMode/EditModeContext'
 import PaginationControls from '../PaginationControls'
+import RichText from '../richText/RichText'
 
 interface CourseGridProps {
   courses: CourseSummary[]
@@ -39,9 +40,10 @@ const CourseGrid = ({
                 className="text-reset text-decoration-none d-flex flex-column p-3"
               >
                 <Card.Title className="h5 pe-5 mb-2">{course.name}</Card.Title>
-                <Card.Text className="text-muted small pe-5 mb-3">
-                  {course.description}
-                </Card.Text>
+                <RichText
+                  html={course.description}
+                  className="text-muted small pe-5 mb-3"
+                />
                 <Card.Text className="text-muted small pe-5 mb-0 mt-auto">
                   {new Date(course.startDate).toLocaleDateString()} -{' '}
                   {new Date(course.endDate).toLocaleDateString()}

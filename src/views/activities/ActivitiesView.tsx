@@ -9,11 +9,12 @@ import {
   Badge,
   Form,
 } from 'react-bootstrap'
-import { ListCheck } from 'react-bootstrap-icons'
+import { DomainIcon } from '../../components/DomainIcon'
 import { getMineActivities, getAllActivities } from '../../api/activity'
 import type { Activity } from '../../types/activity'
 import PaginationControls from '../../components/PaginationControls'
 import ActivityResourcesInline from '../../components/resources/ActivityResourcesInline'
+import RichText from '../../components/richText/RichText'
 
 function formatActivityDate(act: Activity) {
   const startDateObj = act.startDate ? new Date(act.startDate) : null
@@ -236,9 +237,10 @@ export const ActivitiesView: React.FC = () => {
                   )}
                 </div>
                 {activity.description && (
-                  <Card.Text className="text-muted small mb-3">
-                    {activity.description}
-                  </Card.Text>
+                  <RichText
+                    html={activity.description}
+                    className="text-muted small mb-3"
+                  />
                 )}
                 <ActivityResourcesInline activityId={activity.id} />
                 <Card.Text className="text-muted small mb-0 mt-auto">
@@ -254,8 +256,8 @@ export const ActivitiesView: React.FC = () => {
 
   return (
     <Container className="py-4">
-      <div className="d-flex align-items-center gap-2 mb-3">
-        <ListCheck size={28} className="text-body" />
+      <div className="d-flex align-items-center gap-3 mb-3">
+        <DomainIcon type="activity" size={28} className="text-primary" />
         <h1 className="h2 mb-0">Activities</h1>
       </div>
 
@@ -368,9 +370,10 @@ export const ActivitiesView: React.FC = () => {
                           )}
                         </div>
                         {activity.description && (
-                          <Card.Text className="text-muted small mb-3">
-                            {activity.description}
-                          </Card.Text>
+                          <RichText
+                            html={activity.description}
+                            className="text-muted small mb-3"
+                          />
                         )}
                         <ActivityResourcesInline activityId={activity.id} />
                         <Card.Text className="text-muted small mb-0 mt-auto">

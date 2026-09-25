@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Alert, Card, Col, Row, Spinner } from 'react-bootstrap'
 import type { CourseModule } from '../../types/module'
-import ClampedText from '../ClampedText'
+import ClampedRichText from '../richText/ClampedRichText'
 import PaginationControls from '../PaginationControls'
 
 interface ModulesCardProps {
@@ -36,8 +36,8 @@ const ModulesCard = ({ modules, loading, error }: ModulesCardProps) => {
                   <Card className="h-100 border shadow-sm">
                     <Card.Body>
                       <Card.Title className="h6 mb-2">{module.name}</Card.Title>
-                      <ClampedText
-                        text={module.description}
+                      <ClampedRichText
+                        html={module.description}
                         className="text-muted small mb-2"
                       />
                       <Card.Text className="text-muted small mb-0">

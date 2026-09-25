@@ -1,4 +1,4 @@
-import { apiFetch } from '../utils/apifetch'
+import { apiFetch } from '../utils/apiFetch'
 import { parseApiError } from '../utils/apiError'
 import type {
   Resource,
@@ -70,4 +70,28 @@ export async function deleteResource(id: number): Promise<void> {
   if (!res.ok) {
     throw new Error(await parseApiError(res, 'Could not delete resource.'))
   }
+}
+
+export async function uploadResourceAudio(
+  blob: Blob,
+  fileName: string,
+): Promise<string> {
+  const form = new FormData()
+  form.append('file', blob, fileName)
+
+  const res = await apiFetch('/api/resources/audio', {
+    method: 'POST',
+    body: form,
+  })
+
+  if (!res.ok) {
+    throw new Error(await parseApiError(res, 'Could not upload voice note.'))
+  }
+
+  const data = (await res.json()) as { url?: unknown }
+  const url = typeof data.url === 'string' ? data.url : ''
+  if (!url) {
+    throw new Error('Voice note upload returned no URL.')
+  }
+  return url
 }

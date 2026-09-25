@@ -3,6 +3,8 @@ export interface Resource {
   creatorId: string
   displayName: string
   url: string
+  description?: string
+  audioUrls?: string[]
   isStudentSubmitted: boolean
   lastEditDate: string
   uploadDate: string
@@ -14,6 +16,8 @@ export interface Resource {
 export interface CreateResourceRequest {
   displayName: string
   url: string
+  description?: string
+  audioUrls?: string[]
   courseId?: number
   activityId?: number
   moduleId?: number
@@ -22,4 +26,6 @@ export interface CreateResourceRequest {
 export interface UpdateResourceRequest {
   displayName?: string
   url?: string
+  description?: string
+  audioUrls?: string[]
 }
