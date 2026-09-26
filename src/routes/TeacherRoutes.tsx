@@ -11,7 +11,10 @@ import CourseMembersView from '../views/courses/CourseMembersView'
 import EditUsersView from '../views/courses/EditUsersView'
 import ModulesView from '../views/modules/ModulesView'
 import ActivitiesView from '../views/activities/ActivitiesView'
+import ActivityDetailView from '../views/activities/ActivityDetailView'
+import ResourceDetailView from '../views/resources/ResourceDetailView'
 import AssignmentsView from '../views/assignments/AssignmentsView'
+import AssignmentLinksView from '../views/assignments/AssignmentLinksView'
 
 function TeacherRoutes() {
   return (
@@ -31,7 +34,13 @@ function TeacherRoutes() {
       <Route path="courses/users" element={<EditUsersView />} />
       <Route path="modules" element={<ModulesView />} />
       <Route path="activities" element={<ActivitiesView />} />
+      <Route path="activities/:activityId" element={<ActivityDetailView />} />
+      <Route path="resources/:resourceId" element={<ResourceDetailView />} />
       <Route path="assignments" element={<AssignmentsView />} />
+      <Route
+        path="assignments/:assignmentId/links"
+        element={<AssignmentLinksView />}
+      />
       <Route path="*" element={<p className="p-4">Page not found.</p>} />
     </Routes>
   )
