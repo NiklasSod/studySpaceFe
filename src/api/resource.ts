@@ -13,6 +13,11 @@ async function readJson<T>(res: Response, fallback: string): Promise<T> {
   return res.json()
 }
 
+export async function getResourceById(id: number): Promise<Resource> {
+  const res = await apiFetch(`/api/resources/${id}`)
+  return readJson(res, `Failed to fetch resource: ${res.status}`)
+}
+
 export async function getCourseResources(
   courseId: number,
 ): Promise<Resource[]> {

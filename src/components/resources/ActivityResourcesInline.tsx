@@ -14,6 +14,7 @@ import type { Resource } from '../../types/resource'
 import ResourceDescription from '../richText/ResourceDescription'
 import RichTextEditor from '../richText/RichTextEditor'
 import VoiceRecorderButton from './VoiceRecorderButton'
+import CopyReferenceButton from '../CopyReferenceButton'
 
 interface ActivityResourcesInlineProps {
   activityId: number
@@ -354,44 +355,49 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
                   />
                 )}
               </div>
-              {isOwner && (
-                <div className="d-flex gap-2 flex-shrink-0">
-                  <Button
-                    size="sm"
-                    variant="outline-secondary"
-                    className="py-0 px-2 small"
-                    onClick={() => startEdit(resource)}
-                  >
-                    Edit
-                  </Button>
-                  {deleteId === resource.id ? (
-                    <span className="d-inline-flex gap-1 align-items-center">
+              {isTeacher && (
+                <div className="d-flex gap-2 flex-shrink-0 align-items-center">
+                  <CopyReferenceButton value={`/resources/${resource.id}`} />
+                  {isOwner && (
+                    <>
                       <Button
                         size="sm"
-                        variant="outline-danger"
+                        variant="outline-secondary"
                         className="py-0 px-2 small"
-                        onClick={() => confirmDelete(resource.id)}
+                        onClick={() => startEdit(resource)}
                       >
-                        Confirm
+                        Edit
                       </Button>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        className="py-0 px-2 small"
-                        onClick={() => setDeleteId(null)}
-                      >
-                        Cancel
-                      </Button>
-                    </span>
-                  ) : (
-                    <Button
-                      size="sm"
-                      variant="outline-danger"
-                      className="py-0 px-2 small"
-                      onClick={() => setDeleteId(resource.id)}
-                    >
-                      Delete
-                    </Button>
+                      {deleteId === resource.id ? (
+                        <span className="d-inline-flex gap-1 align-items-center">
+                          <Button
+                            size="sm"
+                            variant="outline-danger"
+                            className="py-0 px-2 small"
+                            onClick={() => confirmDelete(resource.id)}
+                          >
+                            Confirm
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            className="py-0 px-2 small"
+                            onClick={() => setDeleteId(null)}
+                          >
+                            Cancel
+                          </Button>
+                        </span>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="outline-danger"
+                          className="py-0 px-2 small"
+                          onClick={() => setDeleteId(resource.id)}
+                        >
+                          Delete
+                        </Button>
+                      )}
+                    </>
                   )}
                 </div>
               )}

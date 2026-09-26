@@ -12,9 +12,11 @@ import {
 import { DomainIcon } from '../../components/DomainIcon'
 import { getMineActivities, getAllActivities } from '../../api/activity'
 import type { Activity } from '../../types/activity'
+import { useAuth } from '../../auth/AuthContext'
 import PaginationControls from '../../components/PaginationControls'
 import ActivityResourcesInline from '../../components/resources/ActivityResourcesInline'
 import RichText from '../../components/richText/RichText'
+import CopyReferenceButton from '../../components/CopyReferenceButton'
 
 function formatActivityDate(act: Activity) {
   const startDateObj = act.startDate ? new Date(act.startDate) : null
@@ -100,6 +102,9 @@ function sortActivities(activities: Activity[]) {
 }
 
 export const ActivitiesView: React.FC = () => {
+  const { role } = useAuth()
+  const isTeacher = role !== 'student'
+
   const [activities, setActivities] = useState<Activity[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
@@ -230,11 +235,18 @@ export const ActivitiesView: React.FC = () => {
               <Card.Body className="d-flex flex-column">
                 <div className="d-flex justify-content-between align-items-start mb-2">
                   <Card.Title className="h5 mb-0">{activity.name}</Card.Title>
-                  {activity.type && (
-                    <Badge bg="secondary" className="ms-2">
-                      {activity.type}
-                    </Badge>
-                  )}
+                  <div className="d-flex align-items-center gap-2 flex-shrink-0">
+                    {isTeacher && (
+                      <CopyReferenceButton
+                        value={`/activities/${activity.id}`}
+                      />
+                    )}
+                    {activity.type && (
+                      <Badge bg="secondary" className="ms-2">
+                        {activity.type}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
                 {activity.description && (
                   <RichText

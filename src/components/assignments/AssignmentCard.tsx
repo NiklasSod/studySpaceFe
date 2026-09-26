@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Badge, Button, Card } from 'react-bootstrap'
 import { useAuth } from '../../auth/AuthContext'
 import { useEditMode } from '../../editMode/EditModeContext'
@@ -15,7 +16,8 @@ import AssignmentSubmissionsList from './AssignmentSubmissionsList'
 import { AssignmentFormModal } from './AssignmentFormModal'
 import { DeleteAssignmentModal } from './DeleteAssignmentModal'
 import ViewSubmissionModal from './ViewSubmissionModal'
-import RichText from '../richText/RichText'
+import LinkedRichText from '../richText/LinkedRichText'
+import { extractInternalLinks } from '../../utils/internalLinks'
 
 interface AssignmentCardProps {
   assignment: Assignment
@@ -66,6 +68,12 @@ function AssignmentCard({
     return new Date(gradedAt + REVISION_WINDOW_MS)
   })()
 
+  const links = useMemo(
+    () => extractInternalLinks(assignment.description),
+    [assignment.description],
+  )
+  const linksBase = isTeacher ? '/teacher' : '/student'
+
   const [showSubmit, setShowSubmit] = useState(false)
   const [showSubmission, setShowSubmission] = useState(false)
   const [showEdit, setShowEdit] = useState(false)
@@ -106,10 +114,23 @@ function AssignmentCard({
           </div>
 
           {assignment.description && (
-            <RichText
+            <LinkedRichText
               html={assignment.description}
               className="text-muted small pe-5 mb-2"
             />
+          )}
+
+          {links.length > 0 && (
+            <div className="mb-2">
+              <Link
+                to={`${linksBase}/assignments/${assignment.id}/links`}
+                onClick={(e) => e.stopPropagation()}
+                className="small text-decoration-none"
+                style={{ color: 'var(--link-color)' }}
+              >
+                Linked items ({links.length})
+              </Link>
+            </div>
           )}
 
           <Card.Text className="text-muted small mb-3">
