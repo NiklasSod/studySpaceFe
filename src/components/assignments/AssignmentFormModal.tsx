@@ -176,7 +176,8 @@ export function AssignmentFormModal({
             />
             <Form.Text muted>
               Link to an activity with <code>/activities/5</code> or a resource
-              with <code>/resources/9</code>.
+              with <code>/resources/9</code>. Add custom link text like{' '}
+              <code>[read pages 4-5](/activities/5)</code>.
             </Form.Text>
           </Form.Group>
 

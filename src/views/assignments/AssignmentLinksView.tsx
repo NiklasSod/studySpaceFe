@@ -219,7 +219,8 @@ export default function AssignmentLinksView() {
           <JournalCheck size={18} />
           <span className="small">
             Linked from assignment description references such as{' '}
-            <code>/activities/5</code> or <code>/resources/9</code>.
+            <code>/activities/5</code>, <code>/resources/9</code>, or{' '}
+            <code>[read pages 4-5](/activities/5)</code>.
           </span>
         </Card.Body>
       </Card>

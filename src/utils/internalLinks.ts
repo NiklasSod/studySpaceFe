@@ -2,14 +2,24 @@ export interface InternalLinkRef {
   type: 'activity' | 'resource'
   id: number
   path: string
+  /** Custom link text from `[label](/activities/5)` syntax, if provided. */
+  label?: string
+}
+
+export interface ParsedReference {
+  start: number
+  end: number
+  text: string
+  ref: InternalLinkRef
 }
 
 /**
- * Matches hand-written references such as `/activities/5` or `/resources/9`
- * in rich-text descriptions. Teachers type these references and the frontend
- * turns them into links to the dedicated activity/resource views.
+ * Matches hand-written references in rich-text descriptions:
+ * - `/activities/5` / `/resources/9`
+ * - `[read pages 4-5](/activities/5)` — custom link text
  */
-const REFERENCE_REGEX = /\/activities\/(\d+)\b|\/resources\/(\d+)\b/g
+const REFERENCE_SOURCE =
+  /\[([^\]]+)\]\(\/(activities|resources)\/(\d+)\)|\/(activities|resources)\/(\d+)\b/g
 
 /** Strips HTML tags so references can be found in raw description markup. */
 function stripHtml(html: string): string {
@@ -22,35 +32,52 @@ function isBoundaryChar(char: string | undefined): boolean {
   return !/[\w/]/.test(char)
 }
 
+export function parseInternalReferences(text: string): ParsedReference[] {
+  const references: ParsedReference[] = []
+  const regex = new RegExp(REFERENCE_SOURCE.source, 'g')
+  let match: RegExpExecArray | null
+
+  while ((match = regex.exec(text)) !== null) {
+    if (!isBoundaryChar(text[match.index - 1])) continue
+
+    let type: 'activity' | 'resource'
+    let id: number
+    let label: string | undefined
+
+    if (match[1] !== undefined) {
+      type = match[2] as 'activity' | 'resource'
+      id = Number(match[3])
+      label = match[1].trim() || undefined
+    } else if (match[4] !== undefined) {
+      type = match[4] as 'activity' | 'resource'
+      id = Number(match[5])
+    } else {
+      continue
+    }
+
+    references.push({
+      start: match.index,
+      end: match.index + match[0].length,
+      text: match[0],
+      ref: { type, id, path: `/${type}/${id}`, label },
+    })
+  }
+
+  return references
+}
+
 export function extractInternalLinks(
   html: string | null | undefined,
 ): InternalLinkRef[] {
   const text = stripHtml(html ?? '')
   const refs: InternalLinkRef[] = []
   const seen = new Set<string>()
-  let match: RegExpExecArray | null
 
-  REFERENCE_REGEX.lastIndex = 0
-  while ((match = REFERENCE_REGEX.exec(text)) !== null) {
-    if (!isBoundaryChar(text[match.index - 1])) continue
-
-    let type: 'activity' | 'resource'
-    let id: number
-    if (match[1] !== undefined) {
-      type = 'activity'
-      id = Number(match[1])
-    } else if (match[2] !== undefined) {
-      type = 'resource'
-      id = Number(match[2])
-    } else {
-      continue
-    }
-
-    const key = `${type}:${id}`
+  for (const { ref } of parseInternalReferences(text)) {
+    const key = `${ref.type}:${ref.id}`
     if (seen.has(key)) continue
     seen.add(key)
-
-    refs.push({ type, id, path: match[0] })
+    refs.push(ref)
   }
 
   return refs

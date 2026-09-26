@@ -6,6 +6,7 @@ import {
 } from 'react'
 import { useNavigate, type NavigateFunction } from 'react-router-dom'
 import { sanitizeRichText } from '../../utils/richTextSanitize'
+import { parseInternalReferences } from '../../utils/internalLinks'
 import { useAuth } from '../../auth/AuthContext'
 
 interface LinkedRichTextProps {
@@ -33,8 +34,6 @@ const ALLOWED_TAGS = new Set([
   'span',
 ])
 
-const REFERENCE_REGEX = /\/activities\/(\d+)\b|\/resources\/(\d+)\b/g
-
 function styleStringToObject(style: string | null): CSSProperties | undefined {
   if (!style) return undefined
 
@@ -53,34 +52,26 @@ function styleStringToObject(style: string | null): CSSProperties | undefined {
   return result as CSSProperties
 }
 
-function isBoundaryChar(char: string | undefined): boolean {
-  if (char === undefined) return true
-  return !/[\w/]/.test(char)
-}
-
 function splitTextIntoNodes(
   text: string,
   base: string,
   navigate: NavigateFunction,
 ): ReactNode[] {
   const nodes: ReactNode[] = []
+  const references = parseInternalReferences(text)
   let lastIndex = 0
-  let match: RegExpExecArray | null
 
-  REFERENCE_REGEX.lastIndex = 0
-  while ((match = REFERENCE_REGEX.exec(text)) !== null) {
-    if (!isBoundaryChar(text[match.index - 1])) continue
-
-    if (match.index > lastIndex) {
-      nodes.push(text.slice(lastIndex, match.index))
+  for (const reference of references) {
+    if (reference.start > lastIndex) {
+      nodes.push(text.slice(lastIndex, reference.start))
     }
 
-    const path = match[0]
+    const { path, label } = reference.ref
     nodes.push(
       createElement(
         'a',
         {
-          key: `ref-${match.index}`,
+          key: `ref-${reference.start}`,
           href: `${base}${path}`,
           className: 'internal-link',
           onClick: (event: React.MouseEvent) => {
@@ -89,11 +80,11 @@ function splitTextIntoNodes(
             navigate(`${base}${path}`)
           },
         },
-        path,
+        label ?? path,
       ),
     )
 
-    lastIndex = match.index + match[0].length
+    lastIndex = reference.end
   }
 
   if (lastIndex < text.length) {
