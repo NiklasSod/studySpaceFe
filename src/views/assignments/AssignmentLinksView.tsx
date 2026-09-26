@@ -58,6 +58,8 @@ export default function AssignmentLinksView() {
 
   const [assignment, setAssignment] = useState<Assignment | null>(null)
   const [items, setItems] = useState<LinkedItem[]>([])
+  const [linkCount, setLinkCount] = useState(0)
+  const [failedCount, setFailedCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -72,6 +74,8 @@ export default function AssignmentLinksView() {
         setAssignment(assignmentData)
 
         const refs = extractInternalLinks(assignmentData.description)
+        setLinkCount(refs.length)
+
         const results = await Promise.allSettled(
           refs.map(async (ref) => {
             if (ref.type === 'activity') {
@@ -91,6 +95,7 @@ export default function AssignmentLinksView() {
           )
           .map((result) => result.value)
         setItems(loaded)
+        setFailedCount(refs.length - loaded.length)
       } catch (err) {
         if (!ignore) {
           setError(
@@ -148,68 +153,83 @@ export default function AssignmentLinksView() {
             Everything this assignment points to, in one place.
           </p>
 
-          {items.length === 0 ? (
+          {items.length === 0 && linkCount > 0 ? (
+            <Alert variant="warning">
+              Found {linkCount} linked item{linkCount === 1 ? '' : 's'}, but
+              none could be loaded. You may not have access to the linked
+              course, or the item was deleted.
+            </Alert>
+          ) : items.length === 0 ? (
             <Alert variant="secondary">
               This assignment does not link to any activities or resources.
             </Alert>
           ) : (
-            <ListGroup>
-              {items.map((linked) =>
-                linked.type === 'activity' ? (
-                  <ListGroup.Item key={`a-${linked.id}`}>
-                    <div className="d-flex justify-content-between align-items-start gap-2">
-                      <div>
-                        <div className="d-flex align-items-center gap-2 mb-1">
-                          <ListCheck size={16} className="text-primary" />
-                          <Link
-                            to={`${base}/activities/${linked.id}`}
-                            className="fw-semibold text-decoration-none"
-                            style={{ color: 'var(--link-color)' }}
-                          >
-                            {linked.item.name}
-                          </Link>
-                          {linked.item.type && (
-                            <Badge bg="secondary" className="ms-1">
-                              {linked.item.type}
-                            </Badge>
-                          )}
-                        </div>
-                        <div className="text-muted small">
-                          Activity · {formatActivityDate(linked.item)}
+            <>
+              <ListGroup>
+                {items.map((linked) =>
+                  linked.type === 'activity' ? (
+                    <ListGroup.Item key={`a-${linked.id}`}>
+                      <div className="d-flex justify-content-between align-items-start gap-2">
+                        <div>
+                          <div className="d-flex align-items-center gap-2 mb-1">
+                            <ListCheck size={16} className="text-primary" />
+                            <Link
+                              to={`${base}/activities/${linked.id}`}
+                              className="fw-semibold text-decoration-none"
+                              style={{ color: 'var(--link-color)' }}
+                            >
+                              {linked.item.name}
+                            </Link>
+                            {linked.item.type && (
+                              <Badge bg="secondary" className="ms-1">
+                                {linked.item.type}
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="text-muted small">
+                            Activity · {formatActivityDate(linked.item)}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </ListGroup.Item>
-                ) : (
-                  <ListGroup.Item key={`r-${linked.id}`}>
-                    <div className="d-flex justify-content-between align-items-start gap-2">
-                      <div>
-                        <div className="d-flex align-items-center gap-2 mb-1">
-                          <Link45deg size={16} className="text-primary" />
-                          <Link
-                            to={`${base}/resources/${linked.id}`}
-                            className="fw-semibold text-decoration-none"
-                            style={{ color: 'var(--link-color)' }}
-                          >
-                            {linked.item.displayName}
-                          </Link>
-                          <a
-                            href={linked.item.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            aria-label={`Open ${linked.item.displayName}`}
-                            style={{ color: 'var(--link-color)' }}
-                          >
-                            <BoxArrowUpRight size={12} />
-                          </a>
+                    </ListGroup.Item>
+                  ) : (
+                    <ListGroup.Item key={`r-${linked.id}`}>
+                      <div className="d-flex justify-content-between align-items-start gap-2">
+                        <div>
+                          <div className="d-flex align-items-center gap-2 mb-1">
+                            <Link45deg size={16} className="text-primary" />
+                            <Link
+                              to={`${base}/resources/${linked.id}`}
+                              className="fw-semibold text-decoration-none"
+                              style={{ color: 'var(--link-color)' }}
+                            >
+                              {linked.item.displayName}
+                            </Link>
+                            <a
+                              href={linked.item.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              aria-label={`Open ${linked.item.displayName}`}
+                              style={{ color: 'var(--link-color)' }}
+                            >
+                              <BoxArrowUpRight size={12} />
+                            </a>
+                          </div>
+                          <div className="text-muted small">Resource</div>
                         </div>
-                        <div className="text-muted small">Resource</div>
                       </div>
-                    </div>
-                  </ListGroup.Item>
-                ),
+                    </ListGroup.Item>
+                  ),
+                )}
+              </ListGroup>
+              {failedCount > 0 && (
+                <Alert variant="warning" className="mt-3 mb-0">
+                  {failedCount} of {linkCount} linked item
+                  {linkCount === 1 ? '' : 's'} could not be loaded (no access or
+                  deleted).
+                </Alert>
               )}
-            </ListGroup>
+            </>
           )}
         </Col>
       </Row>

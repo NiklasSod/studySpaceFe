@@ -19,11 +19,12 @@ export interface ParsedReference {
  * - `[read pages 4-5](/activities/5)` — custom link text
  */
 const REFERENCE_SOURCE =
-  /\[([^\]]+)\]\(\/(activities|resources)\/(\d+)\)|\/(activities|resources)\/(\d+)\b/g
+  /\[([^\]]+)\]\s*\(\s*\/\s*(activities|resources)\s*\/\s*(\d+)\s*\)|\/(activities|resources)\/(\d+)\b/g
 
-/** Strips HTML tags so references can be found in raw description markup. */
-function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>/g, ' ')
+/** Extracts plain text so references can be found in raw description markup. */
+function extractText(html: string): string {
+  const doc = new DOMParser().parseFromString(html, 'text/html')
+  return doc.body.textContent ?? ''
 }
 
 /** A reference must not be glued to a word character or another slash. */
@@ -69,7 +70,7 @@ export function parseInternalReferences(text: string): ParsedReference[] {
 export function extractInternalLinks(
   html: string | null | undefined,
 ): InternalLinkRef[] {
-  const text = stripHtml(html ?? '')
+  const text = extractText(html ?? '')
   const refs: InternalLinkRef[] = []
   const seen = new Set<string>()
 
