@@ -22,6 +22,7 @@ import ResourcesSection from '../resources/ResourcesSection'
 import ActivityResourcesInline from '../resources/ActivityResourcesInline'
 import RichText from '../richText/RichText'
 import RichTextEditor from '../richText/RichTextEditor'
+import CopyReferenceButton from '../CopyReferenceButton'
 
 interface ModuleActivitiesListProps {
   moduleId: number
@@ -267,11 +268,16 @@ export function ModuleActivitiesList({ moduleId }: ModuleActivitiesListProps) {
                 {formatActivityDate(nextActivity)}
               </div>
             </div>
-            {nextActivity.type && (
-              <Badge bg="secondary" className="ms-2">
-                {nextActivity.type}
-              </Badge>
-            )}
+            <div className="d-flex align-items-center gap-2 flex-shrink-0">
+              {isTeacher && (
+                <CopyReferenceButton value={`/activities/${nextActivity.id}`} />
+              )}
+              {nextActivity.type && (
+                <Badge bg="secondary" className="ms-2">
+                  {nextActivity.type}
+                </Badge>
+              )}
+            </div>
           </ListGroup.Item>
         </ListGroup>
       )}
@@ -313,6 +319,9 @@ export function ModuleActivitiesList({ moduleId }: ModuleActivitiesListProps) {
                     </div>
                   </div>
                   <div className="d-flex align-items-center gap-2 flex-shrink-0">
+                    {isTeacher && (
+                      <CopyReferenceButton value={`/activities/${act.id}`} />
+                    )}
                     {act.type && <Badge bg="secondary">{act.type}</Badge>}
                     {canEdit && (
                       <>

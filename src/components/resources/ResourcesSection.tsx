@@ -14,6 +14,7 @@ import type { Resource } from '../../types/resource'
 import ResourceFormModal from './ResourceFormModal'
 import ConfirmModal from '../ConfirmModal'
 import ResourceDescription from '../richText/ResourceDescription'
+import CopyReferenceButton from '../CopyReferenceButton'
 
 interface ResourcesSectionProps {
   courseId?: number
@@ -186,27 +187,34 @@ function ResourcesSection({
                     Added {new Date(resource.uploadDate).toLocaleDateString()}
                   </div>
                 </div>
-                {isOwner && (
-                  <div className="d-flex gap-2 flex-shrink-0">
-                    <Button
-                      variant="outline-secondary"
-                      size="sm"
-                      className="py-0 px-2 small"
-                      onClick={() => setFormState({ mode: 'edit', resource })}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="outline-danger"
-                      size="sm"
-                      className="py-0 px-2 small"
-                      onClick={() => {
-                        setDeleteError(null)
-                        setDeleteTarget(resource)
-                      }}
-                    >
-                      Delete
-                    </Button>
+                {isTeacher && (
+                  <div className="d-flex gap-2 flex-shrink-0 align-items-center">
+                    <CopyReferenceButton value={`/resources/${resource.id}`} />
+                    {isOwner && (
+                      <>
+                        <Button
+                          variant="outline-secondary"
+                          size="sm"
+                          className="py-0 px-2 small"
+                          onClick={() =>
+                            setFormState({ mode: 'edit', resource })
+                          }
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="outline-danger"
+                          size="sm"
+                          className="py-0 px-2 small"
+                          onClick={() => {
+                            setDeleteError(null)
+                            setDeleteTarget(resource)
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      </>
+                    )}
                   </div>
                 )}
               </ListGroup.Item>
