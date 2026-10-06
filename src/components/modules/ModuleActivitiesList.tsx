@@ -26,6 +26,8 @@ import CopyReferenceButton from '../CopyReferenceButton'
 
 interface ModuleActivitiesListProps {
   moduleId: number
+  moduleStartDate?: string
+  moduleEndDate?: string
 }
 
 const ACTIVITY_TYPES = [
@@ -47,7 +49,11 @@ function formatActivityDate(act: Activity) {
   return start || end ? `Occurs: ${start || end}` : 'Occurs: -'
 }
 
-export function ModuleActivitiesList({ moduleId }: ModuleActivitiesListProps) {
+export function ModuleActivitiesList({
+  moduleId,
+  moduleStartDate,
+  moduleEndDate,
+}: ModuleActivitiesListProps) {
   const { role } = useAuth()
   const { editMode } = useEditMode()
   const isTeacher = role !== 'student'
@@ -69,6 +75,7 @@ export function ModuleActivitiesList({ moduleId }: ModuleActivitiesListProps) {
     type: 'Lecture',
     startDate: '',
     endDate: '',
+    isAlwaysActive: false,
   })
 
   const [saving, setSaving] = useState(false)
@@ -124,6 +131,7 @@ export function ModuleActivitiesList({ moduleId }: ModuleActivitiesListProps) {
       type: 'Lecture',
       startDate: '',
       endDate: '',
+      isAlwaysActive: false,
     })
     setFormError(null)
     setModalState({ mode: 'add' })
@@ -136,6 +144,7 @@ export function ModuleActivitiesList({ moduleId }: ModuleActivitiesListProps) {
       type: act.type || 'Lecture',
       startDate: act.startDate ? act.startDate.split('T')[0] : '',
       endDate: act.endDate ? act.endDate.split('T')[0] : '',
+      isAlwaysActive: Boolean(act.isAlwaysActive),
     })
     setFormError(null)
     setModalState({ mode: 'edit', activity: act })
@@ -145,22 +154,43 @@ export function ModuleActivitiesList({ moduleId }: ModuleActivitiesListProps) {
     e.preventDefault()
     setFormError(null)
 
-    if (!formData.startDate || !formData.endDate) {
-      setFormError('Please specify both start and end dates.')
-      return
-    }
+    let startD: Date
+    let endD: Date
 
-    const startD = new Date(formData.startDate)
-    const endD = new Date(formData.endDate)
+    if (formData.isAlwaysActive) {
+      if (!moduleStartDate || !moduleEndDate) {
+        setFormError('Module dates are unavailable.')
+        return
+      }
 
-    if (isNaN(startD.getTime()) || isNaN(endD.getTime())) {
-      setFormError('Invalid date specified.')
-      return
-    }
+      const moduleStart = new Date(moduleStartDate)
+      endD = new Date(moduleEndDate)
 
-    if (endD <= startD) {
-      setFormError('End date must be after start date.')
-      return
+      if (isNaN(moduleStart.getTime()) || isNaN(endD.getTime())) {
+        setFormError('Invalid module dates.')
+        return
+      }
+
+      const today = new Date()
+      startD = moduleStart > today ? moduleStart : today
+    } else {
+      if (!formData.startDate || !formData.endDate) {
+        setFormError('Please specify both start and end dates.')
+        return
+      }
+
+      startD = new Date(formData.startDate)
+      endD = new Date(formData.endDate)
+
+      if (isNaN(startD.getTime()) || isNaN(endD.getTime())) {
+        setFormError('Invalid date specified.')
+        return
+      }
+
+      if (endD <= startD) {
+        setFormError('End date must be after start date.')
+        return
+      }
     }
 
     try {
@@ -169,6 +199,7 @@ export function ModuleActivitiesList({ moduleId }: ModuleActivitiesListProps) {
         name: formData.name,
         description: formData.description,
         type: formData.type,
+        isAlwaysActive: formData.isAlwaysActive,
         startDate: startD.toISOString(),
         endDate: endD.toISOString(),
       }
@@ -414,28 +445,42 @@ export function ModuleActivitiesList({ moduleId }: ModuleActivitiesListProps) {
                 ))}
               </Form.Select>
             </Form.Group>
-            <Form.Group className="mb-3" controlId="actStart">
-              <Form.Label>Start Date</Form.Label>
-              <Form.Control
-                type="date"
-                value={formData.startDate}
+            <Form.Group className="mb-3" controlId="actAlwaysActive">
+              <Form.Check
+                type="checkbox"
+                label="During module"
+                checked={formData.isAlwaysActive}
                 onChange={(e) =>
-                  setFormData({ ...formData, startDate: e.target.value })
+                  setFormData({ ...formData, isAlwaysActive: e.target.checked })
                 }
-                required
               />
             </Form.Group>
-            <Form.Group className="mb-3" controlId="actEnd">
-              <Form.Label>End Date</Form.Label>
-              <Form.Control
-                type="date"
-                value={formData.endDate}
-                onChange={(e) =>
-                  setFormData({ ...formData, endDate: e.target.value })
-                }
-                required
-              />
-            </Form.Group>
+            {!formData.isAlwaysActive && (
+              <>
+                <Form.Group className="mb-3" controlId="actStart">
+                  <Form.Label>Start Date</Form.Label>
+                  <Form.Control
+                    type="date"
+                    value={formData.startDate}
+                    onChange={(e) =>
+                      setFormData({ ...formData, startDate: e.target.value })
+                    }
+                    required
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3" controlId="actEnd">
+                  <Form.Label>End Date</Form.Label>
+                  <Form.Control
+                    type="date"
+                    value={formData.endDate}
+                    onChange={(e) =>
+                      setFormData({ ...formData, endDate: e.target.value })
+                    }
+                    required
+                  />
+                </Form.Group>
+              </>
+            )}
           </Modal.Body>
           <Modal.Footer>
             <Button
