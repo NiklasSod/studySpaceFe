@@ -169,6 +169,10 @@ export default function CreateAccountView() {
                 }}
                 required
               />
+              <Form.Text muted>
+                Must be at least 8 characters and include one lowercase letter,
+                one uppercase letter, and one digit.
+              </Form.Text>
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="registerConfirmPassword">
