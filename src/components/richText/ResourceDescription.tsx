@@ -1,4 +1,12 @@
-import { createElement, useMemo, type CSSProperties, type ReactNode } from 'react'
+import {
+  createElement,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from 'react'
 import { sanitizeRichText } from '../../utils/richTextSanitize'
 import InlineAudioPlayer from './InlineAudioPlayer'
 
@@ -6,6 +14,7 @@ interface ResourceDescriptionProps {
   html?: string | null
   audioUrls?: string[]
   className?: string
+  lines?: number
 }
 
 const AUDIO_MARKER_SOURCE = '\\[\\[audio:(\\d+)\\]\\]'
@@ -137,7 +146,12 @@ export default function ResourceDescription({
   html,
   audioUrls,
   className,
+  lines = 3,
 }: ResourceDescriptionProps) {
+  const contentRef = useRef<HTMLDivElement | null>(null)
+  const [hasOverflow, setHasOverflow] = useState(false)
+  const [expanded, setExpanded] = useState(false)
+
   const children = useMemo(() => {
     const clean = sanitizeRichText(html)
     const doc = new DOMParser().parseFromString(clean, 'text/html')
@@ -151,7 +165,47 @@ export default function ResourceDescription({
     return nodes
   }, [html, audioUrls])
 
+  useEffect(() => {
+    const el = contentRef.current
+    if (!el || expanded) return
+
+    const measure = () => {
+      setHasOverflow(el.scrollHeight > el.clientHeight)
+    }
+
+    measure()
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [children, expanded])
+
+  const clampStyle = expanded
+    ? undefined
+    : ({
+        display: '-webkit-box',
+        WebkitLineClamp: lines,
+        WebkitBoxOrient: 'vertical',
+        overflow: 'hidden',
+      } as CSSProperties)
+
   return (
-    <div className={`rich-text-display ${className ?? ''}`.trim()}>{children}</div>
+    <>
+      <div
+        ref={contentRef}
+        className={`rich-text-display ${className ?? ''}`.trim()}
+        style={clampStyle}
+      >
+        {children}
+      </div>
+      {hasOverflow && (
+        <button
+          type="button"
+          className="btn btn-link btn-sm p-0 text-decoration-none"
+          style={{ position: 'relative', zIndex: 1 }}
+          onClick={() => setExpanded((prev) => !prev)}
+        >
+          {expanded ? 'Read less' : 'Read more'}
+        </button>
+      )}
+    </>
   )
 }
