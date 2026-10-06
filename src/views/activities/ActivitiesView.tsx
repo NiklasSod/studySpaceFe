@@ -17,6 +17,7 @@ import PaginationControls from '../../components/PaginationControls'
 import ActivityResourcesInline from '../../components/resources/ActivityResourcesInline'
 import RichText from '../../components/richText/RichText'
 import CopyReferenceButton from '../../components/CopyReferenceButton'
+import ClampedRichText from '../../components/richText/ClampedRichText'
 
 function formatActivityDate(act: Activity) {
   const startDateObj = act.startDate ? new Date(act.startDate) : null
@@ -108,12 +109,14 @@ export const ActivitiesView: React.FC = () => {
   const [activities, setActivities] = useState<Activity[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
-  const [selectedWeek, setSelectedWeek] = useState<'this' | 'next'>('this')
+  const [selectedWeek, setSelectedWeek] = useState<'this' | 'next' | 'during'>(
+    'this',
+  )
   const [selectedTypeBySection, setSelectedTypeBySection] = useState<{
-    thisWeek: string
+    tab: string
     allActivities: string
   }>({
-    thisWeek: 'All',
+    tab: 'All',
     allActivities: 'All',
   })
   const [allActivitiesPage, setAllActivitiesPage] = useState(1)
@@ -146,24 +149,33 @@ export const ActivitiesView: React.FC = () => {
 
     return {
       thisWeek: sortActivities(
-        activities.filter((activity) =>
-          activityWithinRange(activity, thisWeekStart, thisWeekEnd),
+        activities.filter(
+          (activity) =>
+            !activity.isAlwaysActive &&
+            activityWithinRange(activity, thisWeekStart, thisWeekEnd),
         ),
       ),
       nextWeek: sortActivities(
-        activities.filter((activity) =>
-          activityWithinRange(activity, nextWeekStart, nextWeekEnd),
+        activities.filter(
+          (activity) =>
+            !activity.isAlwaysActive &&
+            activityWithinRange(activity, nextWeekStart, nextWeekEnd),
         ),
+      ),
+      duringModule: sortActivities(
+        activities.filter((activity) => activity.isAlwaysActive),
       ),
     }
   }, [activities])
 
   const effectiveWeek =
-    selectedWeek === 'this' &&
-    weeklySchedule.thisWeek.length === 0 &&
-    weeklySchedule.nextWeek.length > 0
-      ? 'next'
-      : selectedWeek
+    selectedWeek !== 'this' || weeklySchedule.thisWeek.length > 0
+      ? selectedWeek
+      : weeklySchedule.nextWeek.length > 0
+        ? 'next'
+        : weeklySchedule.duringModule.length > 0
+          ? 'during'
+          : selectedWeek
 
   const activityTypeOptions = useMemo(
     () => [
@@ -249,9 +261,11 @@ export const ActivitiesView: React.FC = () => {
                   </div>
                 </div>
                 {activity.description && (
-                  <RichText
+                  <ClampedRichText
                     html={activity.description}
-                    className="text-muted small mb-3"
+                    lines={5}
+                    className="text-muted mb-2"
+                    style={{ fontSize: '1rem' }}
                   />
                 )}
                 <ActivityResourcesInline activityId={activity.id} />
@@ -306,19 +320,32 @@ export const ActivitiesView: React.FC = () => {
                 >
                   Next week
                 </button>
+                <div
+                  className="border-start border-secondary"
+                  style={{ height: '1.5rem' }}
+                />
+                <button
+                  type="button"
+                  className={`btn btn-link text-decoration-none fw-semibold px-3 py-2 ${
+                    effectiveWeek === 'during' ? 'text-body' : 'text-muted'
+                  }`}
+                  onClick={() => setSelectedWeek('during')}
+                >
+                  During module
+                </button>
               </div>
 
               <Form.Select
                 size="sm"
                 className="w-auto me-3"
-                value={selectedTypeBySection.thisWeek}
+                value={selectedTypeBySection.tab}
                 onChange={(event) =>
                   setSelectedTypeBySection((prev) => ({
                     ...prev,
-                    thisWeek: event.target.value,
+                    tab: event.target.value,
                   }))
                 }
-                aria-label="Filter this week activities"
+                aria-label="Filter activities in this tab"
               >
                 {activityTypeOptions.map((type) => (
                   <option key={type} value={type}>
@@ -332,12 +359,16 @@ export const ActivitiesView: React.FC = () => {
                 filterActivitiesByType(
                   effectiveWeek === 'this'
                     ? weeklySchedule.thisWeek
-                    : weeklySchedule.nextWeek,
-                  selectedTypeBySection.thisWeek,
+                    : effectiveWeek === 'next'
+                      ? weeklySchedule.nextWeek
+                      : weeklySchedule.duringModule,
+                  selectedTypeBySection.tab,
                 ),
                 effectiveWeek === 'this'
                   ? 'No activities scheduled for this week.'
-                  : 'No activities scheduled for next week.',
+                  : effectiveWeek === 'next'
+                    ? 'No activities scheduled for next week.'
+                    : 'No activities during the module.',
               )}
             </Card.Body>
           </Card>

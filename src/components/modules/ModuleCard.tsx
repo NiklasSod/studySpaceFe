@@ -131,7 +131,11 @@ function ModuleCard({ module, onEdit, onDelete }: ModuleCardProps) {
             {new Date(moduleData.startDate).toLocaleDateString()} -{' '}
             {new Date(moduleData.endDate).toLocaleDateString()}
           </Card.Text>
-          <ModuleActivitiesList moduleId={moduleData.id} />
+          <ModuleActivitiesList
+            moduleId={moduleData.id}
+            moduleStartDate={moduleData.startDate}
+            moduleEndDate={moduleData.endDate}
+          />
           <ResourcesSection
             moduleId={moduleData.id}
             title="Module resources"
