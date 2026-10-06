@@ -205,7 +205,11 @@ export const CourseModulesView: React.FC = () => {
                       title="Module resources"
                       bordered
                     />
-                    <ModuleActivitiesList moduleId={module.id} />
+                    <ModuleActivitiesList
+                      moduleId={module.id}
+                      moduleStartDate={module.startDate}
+                      moduleEndDate={module.endDate}
+                    />
                   </ListGroup.Item>
                 ))
               ) : (

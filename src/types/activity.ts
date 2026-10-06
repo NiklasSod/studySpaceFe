@@ -14,6 +14,7 @@ export interface CreateActivityRequest {
   type: string
   name: string
   description: string
+  isAlwaysActive?: boolean
   startDate: string
   endDate: string
 }
@@ -23,6 +24,7 @@ export interface UpdateActivityRequest {
   type?: string
   name?: string
   description?: string
+  isAlwaysActive?: boolean
   startDate?: string
   endDate?: string
 }
