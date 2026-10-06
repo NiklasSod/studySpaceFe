@@ -17,6 +17,7 @@ import PaginationControls from '../../components/PaginationControls'
 import ActivityResourcesInline from '../../components/resources/ActivityResourcesInline'
 import RichText from '../../components/richText/RichText'
 import CopyReferenceButton from '../../components/CopyReferenceButton'
+import ClampedRichText from '../../components/richText/ClampedRichText'
 
 function formatActivityDate(act: Activity) {
   const startDateObj = act.startDate ? new Date(act.startDate) : null
@@ -260,9 +261,11 @@ export const ActivitiesView: React.FC = () => {
                   </div>
                 </div>
                 {activity.description && (
-                  <RichText
+                  <ClampedRichText
                     html={activity.description}
-                    className="text-muted small mb-3"
+                    lines={5}
+                    className="text-muted mb-2"
+                    style={{ fontSize: '1rem' }}
                   />
                 )}
                 <ActivityResourcesInline activityId={activity.id} />

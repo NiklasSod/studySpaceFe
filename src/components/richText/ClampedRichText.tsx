@@ -5,6 +5,7 @@ interface ClampedRichTextProps {
   html?: string | null
   lines?: number
   className?: string
+  style?: CSSProperties
 }
 
 /**
@@ -15,6 +16,7 @@ export default function ClampedRichText({
   html,
   lines = 3,
   className,
+  style,
 }: ClampedRichTextProps) {
   const contentRef = useRef<HTMLDivElement | null>(null)
   const [hasOverflow, setHasOverflow] = useState(false)
@@ -36,12 +38,13 @@ export default function ClampedRichText({
   }, [clean, expanded])
 
   const clampStyle = expanded
-    ? undefined
+    ? style
     : ({
         display: '-webkit-box',
         WebkitLineClamp: lines,
         WebkitBoxOrient: 'vertical',
         overflow: 'hidden',
+        ...style,
       } as CSSProperties)
 
   return (
