@@ -4,6 +4,7 @@ export interface Activity {
   type: string
   name: string
   description: string
+  isAlwaysActive: boolean
   startDate: string
   endDate: string
 }
