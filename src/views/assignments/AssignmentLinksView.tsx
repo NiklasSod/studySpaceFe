@@ -198,21 +198,20 @@ export default function AssignmentLinksView() {
                         <div>
                           <div className="d-flex align-items-center gap-2 mb-1">
                             <Link45deg size={16} className="text-primary" />
-                            <Link
-                              to={`${base}/resources/${linked.id}`}
-                              className="fw-semibold text-decoration-none"
-                              style={{ color: 'var(--link-color)' }}
-                            >
-                              {linked.item.displayName}
-                            </Link>
                             <a
                               href={linked.item.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              aria-label={`Open ${linked.item.displayName}`}
+                              className="fw-semibold text-decoration-none d-inline-flex align-items-center gap-1"
                               style={{ color: 'var(--link-color)' }}
                             >
-                              <BoxArrowUpRight size={12} />
+                              <span className="text-break">
+                                {linked.item.displayName}
+                              </span>
+                              <BoxArrowUpRight
+                                size={12}
+                                className="flex-shrink-0"
+                              />
                             </a>
                           </div>
                           <div className="text-muted small">Resource</div>

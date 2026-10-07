@@ -41,26 +41,28 @@ export function parseInternalReferences(text: string): ParsedReference[] {
   while ((match = regex.exec(text)) !== null) {
     if (!isBoundaryChar(text[match.index - 1])) continue
 
-    let type: 'activity' | 'resource'
+    let plural: 'activities' | 'resources'
     let id: number
     let label: string | undefined
 
     if (match[1] !== undefined) {
-      type = match[2] as 'activity' | 'resource'
+      plural = match[2] as 'activities' | 'resources'
       id = Number(match[3])
       label = match[1].trim() || undefined
     } else if (match[4] !== undefined) {
-      type = match[4] as 'activity' | 'resource'
+      plural = match[4] as 'activities' | 'resources'
       id = Number(match[5])
     } else {
       continue
     }
 
+    const type = plural === 'activities' ? 'activity' : 'resource'
+
     references.push({
       start: match.index,
       end: match.index + match[0].length,
       text: match[0],
-      ref: { type, id, path: `/${type}/${id}`, label },
+      ref: { type, id, path: `/${plural}/${id}`, label },
     })
   }
 
