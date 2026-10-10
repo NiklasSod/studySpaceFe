@@ -62,7 +62,10 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
 
   const [deleteId, setDeleteId] = useState<number | null>(null)
   const [chooserOpen, setChooserOpen] = useState(false)
-  const [imageFormOpen, setImageFormOpen] = useState(false)
+  const [imageFormState, setImageFormState] = useState<{
+    mode: 'add' | 'edit'
+    resource?: Resource
+  } | null>(null)
 
   useEffect(() => {
     let ignore = false
@@ -103,7 +106,7 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
   const handleChooserPick = (kind: AddResourceKind) => {
     setChooserOpen(false)
     if (kind === 'image') {
-      setImageFormOpen(true)
+      setImageFormState({ mode: 'add' })
     } else {
       startAdd()
     }
@@ -397,7 +400,11 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
                         size="sm"
                         variant="outline-secondary"
                         className="py-0 px-2 small"
-                        onClick={() => startEdit(resource)}
+                        onClick={() =>
+                          resource.isInteractiveImage
+                            ? setImageFormState({ mode: 'edit', resource })
+                            : startEdit(resource)
+                        }
                       >
                         Edit
                       </Button>
@@ -525,12 +532,20 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
       />
 
       <InteractiveImageFormModal
-        show={imageFormOpen}
+        show={imageFormState !== null}
+        mode={imageFormState?.mode ?? 'add'}
+        resource={imageFormState?.resource ?? null}
         activityId={activityId}
-        onHide={() => setImageFormOpen(false)}
-        onSaved={(resource) => {
-          setResources((prev) => [...prev, resource])
-          setImageFormOpen(false)
+        onHide={() => setImageFormState(null)}
+        onSaved={(resource, mode) => {
+          setImageFormState(null)
+          if (mode === 'add') {
+            setResources((prev) => [...prev, resource])
+          } else {
+            setResources((prev) =>
+              prev.map((r) => (r.id === resource.id ? resource : r)),
+            )
+          }
         }}
       />
     </div>

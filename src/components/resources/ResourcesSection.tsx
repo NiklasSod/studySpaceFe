@@ -55,7 +55,10 @@ function ResourcesSection({
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [chooserOpen, setChooserOpen] = useState(false)
-  const [imageFormOpen, setImageFormOpen] = useState(false)
+  const [imageFormState, setImageFormState] = useState<{
+    mode: 'add' | 'edit'
+    resource?: Resource
+  } | null>(null)
 
   useEffect(() => {
     let ignore = false
@@ -115,7 +118,7 @@ function ResourcesSection({
   const handleChooserPick = (kind: AddResourceKind) => {
     setChooserOpen(false)
     if (kind === 'image') {
-      setImageFormOpen(true)
+      setImageFormState({ mode: 'add' })
     } else {
       setFormState({ mode: 'add' })
     }
@@ -237,7 +240,9 @@ function ResourcesSection({
                           size="sm"
                           className="py-0 px-2 small"
                           onClick={() =>
-                            setFormState({ mode: 'edit', resource })
+                            resource.isInteractiveImage
+                              ? setImageFormState({ mode: 'edit', resource })
+                              : setFormState({ mode: 'edit', resource })
                           }
                         >
                           Edit
@@ -309,12 +314,14 @@ function ResourcesSection({
       />
 
       <InteractiveImageFormModal
-        show={imageFormOpen}
+        show={imageFormState !== null}
+        mode={imageFormState?.mode ?? 'add'}
+        resource={imageFormState?.resource ?? null}
         courseId={courseId}
         moduleId={moduleId}
         activityId={activityId}
-        onHide={() => setImageFormOpen(false)}
-        onSaved={(resource) => handleSaved(resource, 'add')}
+        onHide={() => setImageFormState(null)}
+        onSaved={handleSaved}
       />
 
       <ResourceFormModal
