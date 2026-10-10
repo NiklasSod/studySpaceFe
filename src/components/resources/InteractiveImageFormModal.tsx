@@ -1,21 +1,29 @@
 import { useRef, useState } from 'react'
 import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap'
-import { createResource, uploadResourceImage } from '../../api/resource'
+import {
+  createResource,
+  updateResource,
+  uploadResourceImage,
+} from '../../api/resource'
 import type { ImagePoint, Resource } from '../../types/resource'
 import { compressImage } from '../../utils/imageCompression'
 import VoiceRecorderButton from './VoiceRecorderButton'
 
 interface InteractiveImageFormModalProps {
   show: boolean
+  mode: 'add' | 'edit'
+  resource?: Resource | null
   courseId?: number
   moduleId?: number
   activityId?: number
   onHide: () => void
-  onSaved: (resource: Resource) => void
+  onSaved: (resource: Resource, mode: 'add' | 'edit') => void
 }
 
 function InteractiveImageFormModal({
   show,
+  mode,
+  resource,
   courseId,
   moduleId,
   activityId,
@@ -31,21 +39,23 @@ function InteractiveImageFormModal({
 
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
-  const reset = () => {
-    setError(null)
-    setDisplayName('')
-    setImageUrl('')
-    setPoints([])
-    if (fileInputRef.current) fileInputRef.current.value = ''
-  }
-
   const handleHide = () => {
     setError(null)
     onHide()
   }
 
   const handleShow = () => {
-    reset()
+    setError(null)
+    if (mode === 'edit' && resource) {
+      setDisplayName(resource.displayName)
+      setImageUrl(resource.url)
+      setPoints(resource.points ?? [])
+    } else {
+      setDisplayName('')
+      setImageUrl('')
+      setPoints([])
+    }
+    if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,16 +110,26 @@ function InteractiveImageFormModal({
     setSaving(true)
     setError(null)
     try {
-      const created = await createResource({
-        displayName: displayName.trim(),
-        url: imageUrl,
-        isInteractiveImage: true,
-        points,
-        courseId,
-        moduleId,
-        activityId,
-      })
-      onSaved(created)
+      if (mode === 'edit' && resource) {
+        const updated = await updateResource(resource.id, {
+          displayName: displayName.trim(),
+          url: imageUrl,
+          isInteractiveImage: true,
+          points,
+        })
+        onSaved(updated, 'edit')
+      } else {
+        const created = await createResource({
+          displayName: displayName.trim(),
+          url: imageUrl,
+          isInteractiveImage: true,
+          points,
+          courseId,
+          moduleId,
+          activityId,
+        })
+        onSaved(created, 'add')
+      }
       handleHide()
     } catch (err) {
       setError(
@@ -123,7 +143,9 @@ function InteractiveImageFormModal({
   return (
     <Modal show={show} onHide={handleHide} onShow={handleShow} centered size="lg">
       <Modal.Header closeButton>
-        <Modal.Title>Add interactive image</Modal.Title>
+        <Modal.Title>
+          {mode === 'edit' ? 'Edit interactive image' : 'Add interactive image'}
+        </Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
@@ -182,7 +204,7 @@ function InteractiveImageFormModal({
                 backgroundColor: 'var(--input-bg)',
               }}
             >
-              <div style={{ position: 'relative', width: 'fit-content' }}>
+              <div style={{ position: 'relative', width: 'max-content' }}>
                 <img
                   src={imageUrl}
                   alt="Uploaded"
@@ -295,6 +317,8 @@ function InteractiveImageFormModal({
               <Spinner animation="border" size="sm" className="me-2" />
               Saving…
             </>
+          ) : mode === 'edit' ? (
+            'Save changes'
           ) : (
             'Save image'
           )}

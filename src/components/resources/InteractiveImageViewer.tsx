@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import type { ImagePoint } from '../../types/resource'
 
 interface InteractiveImageViewerProps {
@@ -13,7 +13,23 @@ interface InteractiveImageViewerProps {
  */
 function InteractiveImageViewer({ url, points }: InteractiveImageViewerProps) {
   const [selected, setSelected] = useState<number | null>(null)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
   const selectedPoint = selected === null ? undefined : points[selected]
+
+  const handleSelect = (index: number) => {
+    setSelected(index)
+    const point = points[index]
+    const audio = audioRef.current
+    if (!audio) return
+
+    if (point?.audioUrl) {
+      audio.src = point.audioUrl
+      void audio.play().catch(() => {})
+    } else {
+      audio.pause()
+      audio.removeAttribute('src')
+    }
+  }
 
   return (
     <div>
@@ -25,7 +41,7 @@ function InteractiveImageViewer({ url, points }: InteractiveImageViewerProps) {
           backgroundColor: 'var(--input-bg)',
         }}
       >
-        <div style={{ position: 'relative', width: 'fit-content' }}>
+        <div style={{ position: 'relative', width: 'max-content' }}>
           <img
             src={url}
             alt=""
@@ -35,20 +51,18 @@ function InteractiveImageViewer({ url, points }: InteractiveImageViewerProps) {
             <button
               key={index}
               type="button"
-              onClick={() => setSelected(index)}
+              onClick={() => handleSelect(index)}
               className="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center p-0"
               style={{
                 position: 'absolute',
                 left: `${point.x * 100}%`,
                 top: `${point.y * 100}%`,
                 transform: 'translate(-50%, -50%)',
-                width: '26px',
-                height: '26px',
+                width: '14px',
+                height: '14px',
                 fontWeight: 600,
                 backgroundColor:
-                  selected === index
-                    ? 'var(--btn-bg)'
-                    : 'var(--link-color)',
+                  selected === index ? 'var(--btn-bg)' : 'var(--link-color)',
                 color: selected === index ? 'var(--btn-text)' : '#fff',
                 border: '2px solid rgba(255,255,255,0.85)',
                 boxShadow: '0 0 0 1px rgba(0,0,0,0.25)',
@@ -72,16 +86,16 @@ function InteractiveImageViewer({ url, points }: InteractiveImageViewerProps) {
           <div className="fw-semibold mb-1">
             {selected !== null && selected + 1}. {selectedPoint.text}
           </div>
-          {selectedPoint.audioUrl && (
-            <audio
-              controls
-              preload="none"
-              src={selectedPoint.audioUrl}
-              className="w-100"
-            />
-          )}
         </div>
       )}
+
+      <audio
+        ref={audioRef}
+        controls
+        preload="none"
+        className="w-100"
+        style={{ display: selectedPoint?.audioUrl ? 'block' : 'none' }}
+      />
     </div>
   )
 }
