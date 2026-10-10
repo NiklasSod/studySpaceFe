@@ -15,6 +15,11 @@ import ResourceDescription from '../richText/ResourceDescription'
 import RichTextEditor from '../richText/RichTextEditor'
 import VoiceRecorderButton from './VoiceRecorderButton'
 import CopyReferenceButton from '../CopyReferenceButton'
+import AddResourceChooserModal, {
+  type AddResourceKind,
+} from './AddResourceChooserModal'
+import InteractiveImageFormModal from './InteractiveImageFormModal'
+import InteractiveImageViewer from './InteractiveImageViewer'
 
 interface ActivityResourcesInlineProps {
   activityId: number
@@ -56,6 +61,8 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
   const editEditorRef = useRef<Editor | null>(null)
 
   const [deleteId, setDeleteId] = useState<number | null>(null)
+  const [chooserOpen, setChooserOpen] = useState(false)
+  const [imageFormOpen, setImageFormOpen] = useState(false)
 
   useEffect(() => {
     let ignore = false
@@ -91,6 +98,15 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
     setDesc('')
     setAudioUrls([])
     setFormError(null)
+  }
+
+  const handleChooserPick = (kind: AddResourceKind) => {
+    setChooserOpen(false)
+    if (kind === 'image') {
+      setImageFormOpen(true)
+    } else {
+      startAdd()
+    }
   }
 
   const submitAdd = async () => {
@@ -217,7 +233,7 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
             variant="outline-primary"
             size="sm"
             className="py-0 px-2 small"
-            onClick={startAdd}
+            onClick={() => setChooserOpen(true)}
           >
             + Add
           </Button>
@@ -332,29 +348,46 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
               key={resource.id}
               className="px-0 py-1 bg-transparent border-0 d-flex justify-content-between align-items-start"
             >
-              <div className="me-2 p-1">
-                <a
-                  href={resource.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-decoration-none d-inline-flex align-items-center gap-1"
-                  style={{ color: 'var(--link-color)' }}
-                >
-                  <span className="text-break">{resource.displayName}</span>
-                  <BoxArrowUpRight
-                    size={10}
-                    className="flex-shrink-0"
-                    style={{ width: 10, height: 10, flexShrink: 0 }}
+              {resource.isInteractiveImage ? (
+                <div className="me-2 flex-grow-1" style={{ minWidth: 0 }}>
+                  <div className="fw-semibold mb-1">{resource.displayName}</div>
+                  <InteractiveImageViewer
+                    url={resource.url}
+                    points={resource.points ?? []}
                   />
-                </a>
-                {resource.description && (
-                  <ResourceDescription
-                    html={resource.description}
-                    audioUrls={resource.audioUrls}
-                    className="text-muted mt-1"
-                  />
-                )}
-              </div>
+                  {resource.description && (
+                    <ResourceDescription
+                      html={resource.description}
+                      audioUrls={resource.audioUrls}
+                      className="text-muted mt-1"
+                    />
+                  )}
+                </div>
+              ) : (
+                <div className="me-2 p-1">
+                  <a
+                    href={resource.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-decoration-none d-inline-flex align-items-center gap-1"
+                    style={{ color: 'var(--link-color)' }}
+                  >
+                    <span className="text-break">{resource.displayName}</span>
+                    <BoxArrowUpRight
+                      size={10}
+                      className="flex-shrink-0"
+                      style={{ width: 10, height: 10, flexShrink: 0 }}
+                    />
+                  </a>
+                  {resource.description && (
+                    <ResourceDescription
+                      html={resource.description}
+                      audioUrls={resource.audioUrls}
+                      className="text-muted mt-1"
+                    />
+                  )}
+                </div>
+              )}
               {isTeacher && (
                 <div className="d-flex gap-2 flex-shrink-0 align-items-center">
                   <CopyReferenceButton value={`/resources/${resource.id}`} />
@@ -484,6 +517,22 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
           </div>
         </div>
       )}
+
+      <AddResourceChooserModal
+        show={chooserOpen}
+        onHide={() => setChooserOpen(false)}
+        onPick={handleChooserPick}
+      />
+
+      <InteractiveImageFormModal
+        show={imageFormOpen}
+        activityId={activityId}
+        onHide={() => setImageFormOpen(false)}
+        onSaved={(resource) => {
+          setResources((prev) => [...prev, resource])
+          setImageFormOpen(false)
+        }}
+      />
     </div>
   )
 }

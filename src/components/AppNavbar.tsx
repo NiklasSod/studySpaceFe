@@ -9,12 +9,13 @@ import { getCourseById } from '../api/course'
 import { getCourseResources } from '../api/resource'
 import BrandLogo from './BrandLogo'
 
-function AppNavbar() {
+function AppNavbar({ top = false }: { top?: boolean }) {
   const navigate = useNavigate()
   const location = useLocation()
   const { role, fullName, logout } = useAuth()
   const { editMode } = useEditMode()
   const [expanded, setExpanded] = useState(false)
+  const [prevPath, setPrevPath] = useState(location.pathname)
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
   const [courseName, setCourseName] = useState('')
@@ -123,6 +124,12 @@ function AppNavbar() {
     }
   }, [expanded])
 
+  // Close the menu whenever the route changes (e.g. browser back/forward).
+  if (location.pathname !== prevPath) {
+    setPrevPath(location.pathname)
+    setExpanded(false)
+  }
+
   async function handleLogout() {
     setExpanded(false)
     await logout()
@@ -142,7 +149,7 @@ function AppNavbar() {
     <Navbar
       expand="sm"
       expanded={expanded}
-      className={`p-3 app-navbar-responsive border-bottom ${!isVisible ? 'navbar-hidden' : ''} ${expanded ? 'expanded' : ''}`}
+      className={`p-3 app-navbar-responsive border-bottom ${top ? 'app-navbar-top' : ''} ${!isVisible && !top ? 'navbar-hidden' : ''} ${expanded ? 'expanded' : ''}`}
     >
       <div className="d-flex align-items-center justify-content-between w-100">
         <Navbar.Brand

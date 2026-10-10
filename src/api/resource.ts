@@ -100,3 +100,27 @@ export async function uploadResourceAudio(
   }
   return url
 }
+
+export async function uploadResourceImage(
+  blob: Blob,
+  fileName: string,
+): Promise<string> {
+  const form = new FormData()
+  form.append('file', blob, fileName)
+
+  const res = await apiFetch('/api/resources/image', {
+    method: 'POST',
+    body: form,
+  })
+
+  if (!res.ok) {
+    throw new Error(await parseApiError(res, 'Could not upload image.'))
+  }
+
+  const data = (await res.json()) as { url?: unknown }
+  const url = typeof data.url === 'string' ? data.url : ''
+  if (!url) {
+    throw new Error('Image upload returned no URL.')
+  }
+  return url
+}

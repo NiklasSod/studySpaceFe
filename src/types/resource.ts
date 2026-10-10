@@ -1,3 +1,10 @@
+export interface ImagePoint {
+  x: number
+  y: number
+  text: string
+  audioUrl: string
+}
+
 export interface Resource {
   id: number
   creatorId: string
@@ -5,6 +12,8 @@ export interface Resource {
   url: string
   description?: string
   audioUrls?: string[]
+  isInteractiveImage: boolean
+  points: ImagePoint[]
   isStudentSubmitted: boolean
   lastEditDate: string
   uploadDate: string
@@ -18,6 +27,8 @@ export interface CreateResourceRequest {
   url: string
   description?: string
   audioUrls?: string[]
+  isInteractiveImage?: boolean
+  points?: ImagePoint[]
   courseId?: number
   activityId?: number
   moduleId?: number
@@ -28,4 +39,6 @@ export interface UpdateResourceRequest {
   url?: string
   description?: string
   audioUrls?: string[]
+  isInteractiveImage?: boolean
+  points?: ImagePoint[]
 }

@@ -17,6 +17,7 @@ import { useAuth } from '../../auth/AuthContext'
 import { DomainIcon } from '../../components/DomainIcon'
 import ResourceDescription from '../../components/richText/ResourceDescription'
 import CopyReferenceButton from '../../components/CopyReferenceButton'
+import InteractiveImageViewer from '../../components/resources/InteractiveImageViewer'
 
 export default function ResourceDetailView() {
   const { resourceId } = useParams<{ resourceId: string }>()
@@ -85,7 +86,7 @@ export default function ResourceDetailView() {
       </Breadcrumb>
 
       <Row>
-        <Col lg={8}>
+        <Col>
           <Card className="shadow-sm">
             <Card.Body>
               <div className="d-flex align-items-center gap-2 mb-3">
@@ -100,6 +101,13 @@ export default function ResourceDetailView() {
                 )}
               </div>
 
+              {resource.isInteractiveImage && (
+                <InteractiveImageViewer
+                  url={resource.url}
+                  points={resource.points ?? []}
+                />
+              )}
+
               {resource.description && (
                 <ResourceDescription
                   html={resource.description}
@@ -109,17 +117,19 @@ export default function ResourceDetailView() {
               )}
 
               <div className="d-flex align-items-center gap-3">
-                <Button
-                  as="a"
-                  href={resource.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  variant="primary"
-                  size="sm"
-                >
-                  <BoxArrowUpRight className="me-1" />
-                  Open resource
-                </Button>
+                {!resource.isInteractiveImage && (
+                  <Button
+                    as="a"
+                    href={resource.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    variant="primary"
+                    size="sm"
+                  >
+                    <BoxArrowUpRight className="me-1" />
+                    Open resource
+                  </Button>
+                )}
                 <span className="text-muted small">
                   Added {new Date(resource.uploadDate).toLocaleDateString()}
                 </span>
