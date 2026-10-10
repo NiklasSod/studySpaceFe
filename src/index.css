@@ -199,6 +199,9 @@ body.menu-open {
     flex-direction: column !important;
     align-items: stretch !important;
     padding: 1rem !important;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 
   .custom-mobile-collapse {
@@ -214,7 +217,7 @@ body.menu-open {
 /* Navbar icon hover and active states */
 .app-navbar-responsive .nav-link:hover svg,
 .app-navbar-responsive .nav-link.active svg,
-.app-navbar-responsive .nav-link[aria-current="page"] svg {
+.app-navbar-responsive .nav-link[aria-current='page'] svg {
   color: var(--bs-primary, #0d6efd) !important;
   transition: color 0.15s ease-in-out;
 }
