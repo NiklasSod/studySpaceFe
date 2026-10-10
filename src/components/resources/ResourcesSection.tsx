@@ -12,6 +12,11 @@ import {
 } from '../../api/resource'
 import type { Resource } from '../../types/resource'
 import ResourceFormModal from './ResourceFormModal'
+import AddResourceChooserModal, {
+  type AddResourceKind,
+} from './AddResourceChooserModal'
+import InteractiveImageFormModal from './InteractiveImageFormModal'
+import InteractiveImageViewer from './InteractiveImageViewer'
 import ConfirmModal from '../ConfirmModal'
 import ResourceDescription from '../richText/ResourceDescription'
 import CopyReferenceButton from '../CopyReferenceButton'
@@ -49,6 +54,8 @@ function ResourcesSection({
   const [deleteTarget, setDeleteTarget] = useState<Resource | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [chooserOpen, setChooserOpen] = useState(false)
+  const [imageFormOpen, setImageFormOpen] = useState(false)
 
   useEffect(() => {
     let ignore = false
@@ -105,6 +112,15 @@ function ResourcesSection({
     }
   }
 
+  const handleChooserPick = (kind: AddResourceKind) => {
+    setChooserOpen(false)
+    if (kind === 'image') {
+      setImageFormOpen(true)
+    } else {
+      setFormState({ mode: 'add' })
+    }
+  }
+
   const handleDelete = async () => {
     if (!deleteTarget) return
     setDeleting(true)
@@ -147,7 +163,9 @@ function ResourcesSection({
             variant="outline-primary"
             size="sm"
             className="py-0 px-2 small"
-            onClick={() => setFormState({ mode: 'add' })}
+            onClick={() =>
+              isTeacher ? setChooserOpen(true) : setFormState({ mode: 'add' })
+            }
           >
             + Add resource
           </Button>
@@ -165,28 +183,50 @@ function ResourcesSection({
                 key={resource.id}
                 className="px-0 py-2 bg-transparent border-bottom d-flex justify-content-between align-items-start"
               >
-                <div className="me-2">
-                  <a
-                    href={resource.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="fw-semibold small text-decoration-none d-inline-flex align-items-center gap-1"
-                    style={{ color: 'var(--link-color)' }}
-                  >
-                    <span className="text-break">{resource.displayName}</span>
-                    <BoxArrowUpRight size={12} className="flex-shrink-0" />
-                  </a>
-                  {resource.description && (
-                    <ResourceDescription
-                      html={resource.description}
-                      audioUrls={resource.audioUrls}
-                      className="text-muted small"
+                {resource.isInteractiveImage ? (
+                  <div className="me-2 flex-grow-1" style={{ minWidth: 0 }}>
+                    <div className="fw-semibold small mb-1">
+                      {resource.displayName}
+                    </div>
+                    <InteractiveImageViewer
+                      url={resource.url}
+                      points={resource.points ?? []}
                     />
-                  )}
-                  <div className="text-muted small mt-1">
-                    Added {new Date(resource.uploadDate).toLocaleDateString()}
+                    {resource.description && (
+                      <ResourceDescription
+                        html={resource.description}
+                        audioUrls={resource.audioUrls}
+                        className="text-muted small"
+                      />
+                    )}
+                    <div className="text-muted small mt-1">
+                      Added {new Date(resource.uploadDate).toLocaleDateString()}
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="me-2">
+                    <a
+                      href={resource.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="fw-semibold small text-decoration-none d-inline-flex align-items-center gap-1"
+                      style={{ color: 'var(--link-color)' }}
+                    >
+                      <span className="text-break">{resource.displayName}</span>
+                      <BoxArrowUpRight size={12} className="flex-shrink-0" />
+                    </a>
+                    {resource.description && (
+                      <ResourceDescription
+                        html={resource.description}
+                        audioUrls={resource.audioUrls}
+                        className="text-muted small"
+                      />
+                    )}
+                    <div className="text-muted small mt-1">
+                      Added {new Date(resource.uploadDate).toLocaleDateString()}
+                    </div>
+                  </div>
+                )}
                 {isTeacher && (
                   <div className="d-flex gap-2 flex-shrink-0 align-items-center">
                     <CopyReferenceButton value={`/resources/${resource.id}`} />
@@ -261,6 +301,21 @@ function ResourcesSection({
           </ListGroup>
         </>
       )}
+
+      <AddResourceChooserModal
+        show={chooserOpen}
+        onHide={() => setChooserOpen(false)}
+        onPick={handleChooserPick}
+      />
+
+      <InteractiveImageFormModal
+        show={imageFormOpen}
+        courseId={courseId}
+        moduleId={moduleId}
+        activityId={activityId}
+        onHide={() => setImageFormOpen(false)}
+        onSaved={(resource) => handleSaved(resource, 'add')}
+      />
 
       <ResourceFormModal
         show={formState !== null}
