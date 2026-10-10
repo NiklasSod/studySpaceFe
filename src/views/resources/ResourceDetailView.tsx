@@ -86,7 +86,7 @@ export default function ResourceDetailView() {
       </Breadcrumb>
 
       <Row>
-        <Col lg={8}>
+        <Col>
           <Card className="shadow-sm">
             <Card.Body>
               <div className="d-flex align-items-center gap-2 mb-3">
