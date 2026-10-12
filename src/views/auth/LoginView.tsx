@@ -4,6 +4,7 @@ import { Eye, EyeSlash } from 'react-bootstrap-icons'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../auth/AuthContext'
 import BrandLogo from '../../components/BrandLogo'
+import ForgotPasswordModal from '../../components/auth/ForgotPasswordModal'
 
 export default function LoginView() {
   const [email, setEmail] = useState('')
@@ -11,6 +12,7 @@ export default function LoginView() {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [showForgotPassword, setShowForgotPassword] = useState(false)
 
   const navigate = useNavigate()
   const { login } = useAuth()
@@ -147,14 +149,15 @@ export default function LoginView() {
             </Button>
 
             <div className="d-flex justify-content-between align-items-center mt-2">
-              <Link
-                to="/forgot-password"
-                className="text-decoration-underline small"
+              <Button
+                variant="link"
+                type="button"
+                onClick={() => setShowForgotPassword(true)}
+                className="text-decoration-underline small p-0"
                 style={{ color: 'var(--link-color)' }}
               >
-                {/* TODO add forgot password if time */}
                 Forgot password?
-              </Link>
+              </Button>
               <Link
                 to="/register"
                 className="text-decoration-underline small"
@@ -166,6 +169,11 @@ export default function LoginView() {
           </Form>
         </div>
       </main>
+
+      <ForgotPasswordModal
+        show={showForgotPassword}
+        onHide={() => setShowForgotPassword(false)}
+      />
     </div>
   )
 }

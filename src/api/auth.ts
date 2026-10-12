@@ -175,6 +175,21 @@ export async function login(
   return data
 }
 
+export async function requestPasswordReset(email: string): Promise<void> {
+  const res = await fetch('/api/auth/forgot-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+    credentials: 'include',
+  })
+
+  if (!res.ok) {
+    throw new Error(
+      await parseApiError(res, 'Could not send password reset email.'),
+    )
+  }
+}
+
 let refreshInFlight: Promise<AuthResponse> | null = null
 
 export function refresh(): Promise<AuthResponse> {
