@@ -179,7 +179,10 @@ function AppNavbar({ top = false }: { top?: boolean }) {
       <div
         className={`custom-mobile-collapse d-sm-flex flex-column align-items-stretch w-100 mt-3`}
       >
-        <Nav className="flex-column w-100 gap-1" onClick={() => setExpanded(false)}>
+        <Nav
+          className="flex-column w-100 gap-1"
+          onClick={() => setExpanded(false)}
+        >
           <Nav.Link
             as={Link}
             to={dashboardPath}
@@ -188,7 +191,11 @@ function AppNavbar({ top = false }: { top?: boolean }) {
               isDashboardActive ? 'fw-bold' : ''
             }`}
           >
-            <DomainIcon type="dashboard" className={isDashboardActive ? 'text-primary' : ''} /> Dashboard
+            <DomainIcon
+              type="dashboard"
+              className={isDashboardActive ? 'text-primary' : ''}
+            />{' '}
+            Dashboard
           </Nav.Link>
           <Nav.Link
             as={Link}
@@ -197,7 +204,11 @@ function AppNavbar({ top = false }: { top?: boolean }) {
               isCoursesActive ? 'fw-bold' : ''
             }`}
           >
-            <DomainIcon type="course" className={isCoursesActive ? 'text-primary' : ''} /> Courses
+            <DomainIcon
+              type="course"
+              className={isCoursesActive ? 'text-primary' : ''}
+            />{' '}
+            Courses
           </Nav.Link>
 
           {isCoursesSection && (activeCourseId || !isStudent) && (
@@ -208,7 +219,8 @@ function AppNavbar({ top = false }: { top?: boolean }) {
                     as={Link}
                     to={`${base}/courses/${activeCourseId}`}
                     className={`py-1 small text-truncate ${
-                      location.pathname === `${base}/courses/${activeCourseId}` && !location.search
+                      location.pathname ===
+                        `${base}/courses/${activeCourseId}` && !location.search
                         ? 'fw-bold text-body'
                         : 'text-muted'
                     }`}
@@ -221,7 +233,9 @@ function AppNavbar({ top = false }: { top?: boolean }) {
                       as={Link}
                       to={`${base}/courses/${activeCourseId}/modules`}
                       className={`py-1 small ${
-                        location.pathname.startsWith(`${base}/courses/${activeCourseId}/modules`)
+                        location.pathname.startsWith(
+                          `${base}/courses/${activeCourseId}/modules`,
+                        )
                           ? 'fw-bold text-body'
                           : 'text-muted'
                       }`}
@@ -257,7 +271,9 @@ function AppNavbar({ top = false }: { top?: boolean }) {
                       as={Link}
                       to={`${base}/courses/${activeCourseId}/members`}
                       className={`py-1 small ${
-                        location.pathname.startsWith(`${base}/courses/${activeCourseId}/members`)
+                        location.pathname.startsWith(
+                          `${base}/courses/${activeCourseId}/members`,
+                        )
                           ? 'fw-bold text-body'
                           : 'text-muted'
                       }`}
@@ -290,7 +306,11 @@ function AppNavbar({ top = false }: { top?: boolean }) {
               isModulesActive ? 'fw-bold' : ''
             }`}
           >
-            <DomainIcon type="module" className={isModulesActive ? 'text-primary' : ''} /> Modules
+            <DomainIcon
+              type="module"
+              className={isModulesActive ? 'text-primary' : ''}
+            />{' '}
+            Modules
           </Nav.Link>
           <Nav.Link
             as={Link}
@@ -299,7 +319,11 @@ function AppNavbar({ top = false }: { top?: boolean }) {
               isActivitiesActive ? 'fw-bold' : ''
             }`}
           >
-            <DomainIcon type="activity" className={isActivitiesActive ? 'text-primary' : ''} /> Activities
+            <DomainIcon
+              type="activity"
+              className={isActivitiesActive ? 'text-primary' : ''}
+            />{' '}
+            Activities
           </Nav.Link>
           <Nav.Link
             as={Link}
@@ -308,7 +332,11 @@ function AppNavbar({ top = false }: { top?: boolean }) {
               isAssignmentsActive ? 'fw-bold' : ''
             }`}
           >
-            <DomainIcon type="assignment" className={isAssignmentsActive ? 'text-primary' : ''} /> Assignments
+            <DomainIcon
+              type="assignment"
+              className={isAssignmentsActive ? 'text-primary' : ''}
+            />{' '}
+            Assignments
           </Nav.Link>
 
           <Nav.Link
@@ -319,7 +347,11 @@ function AppNavbar({ top = false }: { top?: boolean }) {
               isProfileActive ? 'fw-bold' : ''
             }`}
           >
-            <DomainIcon type="profile" className={isProfileActive ? 'text-primary' : ''} /> Profile
+            <DomainIcon
+              type="profile"
+              className={isProfileActive ? 'text-primary' : ''}
+            />{' '}
+            Profile
           </Nav.Link>
 
           <Nav.Link

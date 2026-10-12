@@ -67,7 +67,7 @@ export default function CopyReferenceButton({
     <Button
       variant="outline-secondary"
       size="sm"
-      className={`py-0 px-2 small ${className ?? ''}`.trim()}
+      className={`py-0 px-1 small ${className ?? ''}`.trim()}
       title={`Copy ${value}`}
       aria-label={`Copy link reference ${value}`}
       onClick={handleClick}

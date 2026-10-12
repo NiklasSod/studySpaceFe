@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Editor } from '@tiptap/react'
+import { Link } from 'react-router-dom'
 import { Alert, Button, Form, ListGroup, Spinner } from 'react-bootstrap'
-import { BoxArrowUpRight } from 'react-bootstrap-icons'
+import { BoxArrowUpRight, Eye } from 'react-bootstrap-icons'
 import { useAuth } from '../../auth/AuthContext'
 import { useEditMode } from '../../editMode/EditModeContext'
 import {
@@ -353,7 +354,17 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
             >
               {resource.isInteractiveImage ? (
                 <div className="me-2 flex-grow-1" style={{ minWidth: 0 }}>
-                  <div className="fw-semibold mb-1">{resource.displayName}</div>
+                  <div className="mb-1">
+                    <Link
+                      to={`/${role}/resources/${resource.id}`}
+                      className="fw-semibold d-inline-flex align-items-center gap-1 text-decoration-none resource-detail-link"
+                      style={{ color: 'var(--link-color)' }}
+                      title="View resource details"
+                    >
+                      {resource.displayName}
+                      <Eye size={14} className="flex-shrink-0" />
+                    </Link>
+                  </div>
                   <InteractiveImageViewer
                     url={resource.url}
                     points={resource.points ?? []}
