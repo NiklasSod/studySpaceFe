@@ -5,6 +5,7 @@ import { createResource, updateResource } from '../../api/resource'
 import type { Resource } from '../../types/resource'
 import { useAuth } from '../../auth/AuthContext'
 import RichTextEditor from '../richText/RichTextEditor'
+import DeleteRecordingButton from './DeleteRecordingButton'
 import VoiceRecorderButton from './VoiceRecorderButton'
 
 interface ResourceFormModalProps {
@@ -76,8 +77,8 @@ function ResourceFormModal({
 
     const name = displayName.trim()
     const link = normalizeUrl(url)
-    if (!name || !link) {
-      setError('Please provide both a name and a valid link.')
+    if (!name) {
+      setError('Please provide a name.')
       return
     }
 
@@ -170,10 +171,9 @@ function ResourceFormModal({
                 color: 'var(--input-text)',
                 borderColor: 'var(--input-border)',
               }}
-              required
             />
             <Form.Text className="text-muted">
-              A URL starting with https:// is recommended.
+              Optional. A URL starting with https:// is recommended.
             </Form.Text>
           </Form.Group>
 
@@ -217,14 +217,12 @@ function ResourceFormModal({
                         src={audioUrl}
                         className="flex-grow-1"
                       />
-                      <Button
-                        variant="outline-danger"
-                        size="sm"
-                        onClick={() => removeAudio(index)}
-                        title="Remove voice note"
-                      >
-                        ×
-                      </Button>
+                      <DeleteRecordingButton
+                        resourceId={mode === 'edit' ? resource?.id : undefined}
+                        audioUrl={audioUrl}
+                        disabled={saving}
+                        onDeleted={() => removeAudio(index)}
+                      />
                     </div>
                   ))}
                 </div>

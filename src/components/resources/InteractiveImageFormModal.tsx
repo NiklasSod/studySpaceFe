@@ -7,6 +7,7 @@ import {
 } from '../../api/resource'
 import type { ImagePoint, Resource } from '../../types/resource'
 import { compressImage } from '../../utils/imageCompression'
+import DeleteRecordingButton from './DeleteRecordingButton'
 import VoiceRecorderButton from './VoiceRecorderButton'
 
 interface InteractiveImageFormModalProps {
@@ -70,7 +71,10 @@ function InteractiveImageFormModal({
           compressed.type === 'image/webp'
             ? 'webp'
             : (compressed.type.split('/')[1] ?? 'webp')
-        return uploadResourceImage(compressed, `image-${Date.now()}.${extension}`)
+        return uploadResourceImage(
+          compressed,
+          `image-${Date.now()}.${extension}`,
+        )
       })
       .then((url) => {
         setImageUrl(url)
@@ -99,6 +103,28 @@ function InteractiveImageFormModal({
 
   const removePoint = (index: number) => {
     setPoints((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  /**
+   * Deleting a point's recording removes the point as well — a hotspot without
+   * audio is just an empty marker — so the removal is saved straight away rather
+   * than waiting for the Save button. The recording itself is already gone by the
+   * time this runs.
+   */
+  const removePointAndSave = async (index: number) => {
+    const remaining = points.filter((_, i) => i !== index)
+    setPoints(remaining)
+
+    if (mode !== 'edit' || !resource) return
+
+    try {
+      const updated = await updateResource(resource.id, { points: remaining })
+      onSaved(updated, 'edit')
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Could not remove the point.',
+      )
+    }
   }
 
   const handleSubmit = async () => {
@@ -132,16 +158,20 @@ function InteractiveImageFormModal({
       }
       handleHide()
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Could not save the image.',
-      )
+      setError(err instanceof Error ? err.message : 'Could not save the image.')
     } finally {
       setSaving(false)
     }
   }
 
   return (
-    <Modal show={show} onHide={handleHide} onShow={handleShow} centered size="lg">
+    <Modal
+      show={show}
+      onHide={handleHide}
+      onShow={handleShow}
+      centered
+      size="lg"
+    >
       <Modal.Header closeButton>
         <Modal.Title>
           {mode === 'edit' ? 'Edit interactive image' : 'Add interactive image'}
@@ -256,15 +286,20 @@ function InteractiveImageFormModal({
                     }}
                   >
                     <div className="d-flex justify-content-between align-items-center mb-1">
-                      <span className="fw-semibold small">
-                        Point {index + 1}
-                      </span>
+                      <div className="d-flex justify-content-between w-100 me-1">
+                        <span className="fw-semibold small">
+                          Point {index + 1}
+                        </span>
+                        <span className="fw-semibold small">
+                          Deletes on 'save change'
+                        </span>
+                      </div>
                       <Button
                         variant="outline-danger"
                         size="sm"
                         className="py-0 px-2"
                         onClick={() => removePoint(index)}
-                        title="Remove point"
+                        title="Remove point and sound"
                       >
                         ×
                       </Button>
@@ -273,21 +308,36 @@ function InteractiveImageFormModal({
                       as="textarea"
                       rows={2}
                       value={point.text}
-                      onChange={(e) => updatePoint(index, { text: e.target.value })}
+                      onChange={(e) =>
+                        updatePoint(index, { text: e.target.value })
+                      }
                       placeholder="Label shown for this point"
                       className="mb-2"
                     />
                     <VoiceRecorderButton
-                      onUploaded={(url) => updatePoint(index, { audioUrl: url })}
+                      onUploaded={(url) =>
+                        updatePoint(index, { audioUrl: url })
+                      }
                       disabled={saving || uploading}
                     />
                     {point.audioUrl && (
-                      <audio
-                        controls
-                        preload="none"
-                        src={point.audioUrl}
-                        className="w-100 mt-2"
-                      />
+                      <div className="d-flex align-items-center gap-2 mt-2">
+                        <audio
+                          controls
+                          preload="none"
+                          src={point.audioUrl}
+                          className="flex-grow-1"
+                        />
+                        <DeleteRecordingButton
+                          resourceId={
+                            mode === 'edit' ? resource?.id : undefined
+                          }
+                          audioUrl={point.audioUrl}
+                          disabled={saving || uploading}
+                          message="The recording is deleted immediately and the point is removed from the image. This cannot be undone."
+                          onDeleted={() => void removePointAndSave(index)}
+                        />
+                      </div>
                     )}
                   </div>
                 ))}

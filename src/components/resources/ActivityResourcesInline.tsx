@@ -19,6 +19,7 @@ import CopyReferenceButton from '../CopyReferenceButton'
 import AddResourceChooserModal, {
   type AddResourceKind,
 } from './AddResourceChooserModal'
+import DeleteRecordingButton from './DeleteRecordingButton'
 import InteractiveImageFormModal from './InteractiveImageFormModal'
 import InteractiveImageViewer from './InteractiveImageViewer'
 
@@ -115,8 +116,8 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
 
   const submitAdd = async () => {
     const link = normalizeUrl(url)
-    if (!name.trim() || !link) {
-      setFormError('Please provide both a name and a valid link.')
+    if (!name.trim()) {
+      setFormError('Please provide a name.')
       return
     }
 
@@ -157,8 +158,8 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
   const submitEdit = async () => {
     if (editingId === null) return
     const link = normalizeUrl(editUrl)
-    if (!editName.trim() || !link) {
-      setFormError('Please provide both a name and a valid link.')
+    if (!editName.trim()) {
+      setFormError('Please provide a name.')
       return
     }
 
@@ -309,15 +310,12 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
                               src={audioUrl}
                               className="flex-grow-1"
                             />
-                            <Button
-                              size="sm"
-                              variant="outline-danger"
-                              className="py-0 px-2"
-                              onClick={() => removeEditAudio(index)}
-                              title="Remove voice note"
-                            >
-                              ×
-                            </Button>
+                            <DeleteRecordingButton
+                              resourceId={editingId ?? undefined}
+                              audioUrl={audioUrl}
+                              disabled={saving}
+                              onDeleted={() => removeEditAudio(index)}
+                            />
                           </div>
                         ))}
                       </div>
@@ -499,15 +497,11 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
                         src={audioUrl}
                         className="flex-grow-1"
                       />
-                      <Button
-                        size="sm"
-                        variant="outline-danger"
-                        className="py-0 px-2"
-                        onClick={() => removeAddAudio(index)}
-                        title="Remove voice note"
-                      >
-                        ×
-                      </Button>
+                      <DeleteRecordingButton
+                        audioUrl={audioUrl}
+                        disabled={saving}
+                        onDeleted={() => removeAddAudio(index)}
+                      />
                     </div>
                   ))}
                 </div>
