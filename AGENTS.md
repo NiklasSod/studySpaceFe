@@ -138,6 +138,7 @@ const inputStyle = {
 - `EditModeProvider` toggles teacher edit controls and persists to `localStorage` under the `editMode` key.
 - [imageCompression.ts](src/utils/imageCompression.ts) compresses uploaded images before upload; [submissionStatus.ts](src/utils/submissionStatus.ts) and [enrollmentStatus.ts](src/utils/enrollmentStatus.ts) map backend status strings to labels/colors.
 - File uploads (`Blob`/`FormData`) go through `apiFetch` — it skips the JSON content-type header automatically for `FormData` bodies.
+- Recordings (voice notes) are Cloudinary assets owned by a resource. The forms keep the whole list in state (`audioUrls`, or `points[].audioUrl` for an interactive image) and saving destroys the recordings the list no longer contains, so always send the full list on `PATCH` and never drop an entry that should survive. [DeleteRecordingButton](src/components/resources/DeleteRecordingButton.tsx) deletes one recording immediately through `DELETE /api/resources/{id}/audio` (it is irreversible, hence the confirmation) and is the only place that calls it; for an interactive image point, deleting the recording removes the point as well.
 
 ## Before submitting changes
 

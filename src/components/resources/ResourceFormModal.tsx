@@ -5,6 +5,7 @@ import { createResource, updateResource } from '../../api/resource'
 import type { Resource } from '../../types/resource'
 import { useAuth } from '../../auth/AuthContext'
 import RichTextEditor from '../richText/RichTextEditor'
+import DeleteRecordingButton from './DeleteRecordingButton'
 import VoiceRecorderButton from './VoiceRecorderButton'
 
 interface ResourceFormModalProps {
@@ -216,14 +217,12 @@ function ResourceFormModal({
                         src={audioUrl}
                         className="flex-grow-1"
                       />
-                      <Button
-                        variant="outline-danger"
-                        size="sm"
-                        onClick={() => removeAudio(index)}
-                        title="Remove voice note"
-                      >
-                        ×
-                      </Button>
+                      <DeleteRecordingButton
+                        resourceId={mode === 'edit' ? resource?.id : undefined}
+                        audioUrl={audioUrl}
+                        disabled={saving}
+                        onDeleted={() => removeAudio(index)}
+                      />
                     </div>
                   ))}
                 </div>

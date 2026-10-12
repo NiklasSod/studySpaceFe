@@ -77,6 +77,25 @@ export async function deleteResource(id: number): Promise<void> {
   }
 }
 
+/**
+ * Removes a single recording from a saved resource and deletes the underlying
+ * asset. Works for both a resource's voice notes and the voice note of an
+ * interactive image point.
+ */
+export async function deleteResourceAudio(
+  resourceId: number,
+  audioUrl: string,
+): Promise<void> {
+  const res = await apiFetch(
+    `/api/resources/${resourceId}/audio?url=${encodeURIComponent(audioUrl)}`,
+    { method: 'DELETE' },
+  )
+
+  if (!res.ok) {
+    throw new Error(await parseApiError(res, 'Could not delete recording.'))
+  }
+}
+
 export async function uploadResourceAudio(
   blob: Blob,
   fileName: string,
