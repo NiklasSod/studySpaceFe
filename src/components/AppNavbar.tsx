@@ -28,6 +28,9 @@ function AppNavbar({ top = false }: { top?: boolean }) {
   const activitiesPath = isStudent
     ? '/student/activities'
     : '/teacher/activities'
+  const myResourcesPath = isStudent
+    ? '/student/resources/mine'
+    : '/teacher/resources/mine'
   const assignmentsPath = isStudent
     ? '/student/assignments'
     : '/teacher/assignments'
@@ -141,6 +144,7 @@ function AppNavbar({ top = false }: { top?: boolean }) {
     location.pathname.startsWith(coursesPath) || Boolean(queryCourseId)
   const isModulesActive = location.pathname.startsWith(modulesPath)
   const isActivitiesActive = location.pathname.startsWith(activitiesPath)
+  const isMyResourcesActive = location.pathname === myResourcesPath
   const isAssignmentsActive =
     location.pathname.startsWith(assignmentsPath) && !queryCourseId
   const isProfileActive = location.pathname.startsWith(profilePath)
@@ -324,6 +328,19 @@ function AppNavbar({ top = false }: { top?: boolean }) {
               className={isActivitiesActive ? 'text-primary' : ''}
             />{' '}
             Activities
+          </Nav.Link>
+          <Nav.Link
+            as={Link}
+            to={myResourcesPath}
+            className={`d-flex align-items-center gap-2 px-2 py-2 nav-link-stable ${
+              isMyResourcesActive ? 'fw-bold' : ''
+            }`}
+          >
+            <DomainIcon
+              type="resource"
+              className={isMyResourcesActive ? 'text-primary' : ''}
+            />{' '}
+            My resources
           </Nav.Link>
           <Nav.Link
             as={Link}

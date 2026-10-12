@@ -12,7 +12,7 @@ function AppLayout() {
       className={`app-layout d-flex ${isResourceDetail ? 'app-layout-top' : ''}`}
     >
       <AppNavbar top={isResourceDetail} />
-      <main className="flex-grow-1 p-2">
+      <main className="flex-grow-1 p-2" style={{ minWidth: 0 }}>
         <Outlet />
       </main>
     </div>

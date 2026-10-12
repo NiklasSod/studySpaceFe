@@ -12,6 +12,7 @@ import ActivityDetailView from '../views/activities/ActivityDetailView'
 import ResourceDetailView from '../views/resources/ResourceDetailView'
 import AssignmentsView from '../views/assignments/AssignmentsView'
 import AssignmentLinksView from '../views/assignments/AssignmentLinksView'
+import MyResourcesView from '../views/resources/MyResourcesView'
 
 function StudentRoutes() {
   return (
@@ -29,6 +30,7 @@ function StudentRoutes() {
       <Route path="modules" element={<ModulesView />} />
       <Route path="activities" element={<ActivitiesView />} />
       <Route path="activities/:activityId" element={<ActivityDetailView />} />
+      <Route path="resources/mine" element={<MyResourcesView />} />
       <Route path="resources/:resourceId" element={<ResourceDetailView />} />
       <Route path="assignments" element={<AssignmentsView />} />
       <Route

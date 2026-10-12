@@ -30,7 +30,7 @@ const ModulesCard = ({ modules, loading, error }: ModulesCardProps) => {
         )}
         {!loading && !error && modules.length > 0 && (
           <>
-            <Row xs={1} md={2} lg={2} className="g-3">
+            <Row xs={1} sm={1} md={1} lg={2} className="g-3">
               {currentModules.map((module) => (
                 <Col key={module.id}>
                   <Card className="h-100 border shadow-sm">

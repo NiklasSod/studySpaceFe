@@ -210,7 +210,7 @@ export const ActivitiesView: React.FC = () => {
 
   if (loading) {
     return (
-      <Container className="py-4 text-center">
+      <Container fluid className="py-4 text-center">
         <Spinner animation="border" role="status" />
       </Container>
     )
@@ -218,7 +218,7 @@ export const ActivitiesView: React.FC = () => {
 
   if (error) {
     return (
-      <Container className="py-4">
+      <Container fluid className="py-4">
         <Alert variant="danger">{error}</Alert>
       </Container>
     )
@@ -240,7 +240,7 @@ export const ActivitiesView: React.FC = () => {
     }
 
     return (
-      <Row xs={1} md={2} lg={3} className="g-3">
+      <Row xs={1} sm={1} md={1} lg={2} className="g-3">
         {items.map((activity) => (
           <Col key={activity.id}>
             <Card className="h-100 border shadow-sm">
@@ -281,7 +281,7 @@ export const ActivitiesView: React.FC = () => {
   }
 
   return (
-    <Container className="py-4">
+    <Container fluid className="py-4">
       <div className="d-flex align-items-center gap-3 mb-3">
         <DomainIcon type="activity" size={28} className="text-primary" />
         <h1 className="h2 mb-0">Activities</h1>
@@ -296,48 +296,50 @@ export const ActivitiesView: React.FC = () => {
       ) : (
         <>
           <Card className="border-0 shadow-sm mb-4">
-            <Card.Header className="d-flex align-items-center justify-content-between p-0 border-0 border-bottom border-light-subtle">
-              <div className="d-flex align-items-center">
-                <button
-                  type="button"
-                  className={`btn btn-link text-decoration-none fw-semibold px-3 py-2 ${
-                    effectiveWeek === 'this' ? 'text-body' : 'text-muted'
-                  }`}
-                  onClick={() => setSelectedWeek('this')}
-                >
-                  This week
-                </button>
-                <div
-                  className="border-start border-secondary"
-                  style={{ height: '1.5rem' }}
-                />
-                <button
-                  type="button"
-                  className={`btn btn-link text-decoration-none fw-semibold px-3 py-2 ${
-                    effectiveWeek === 'next' ? 'text-body' : 'text-muted'
-                  }`}
-                  onClick={() => setSelectedWeek('next')}
-                >
-                  Next week
-                </button>
-                <div
-                  className="border-start border-secondary"
-                  style={{ height: '1.5rem' }}
-                />
-                <button
-                  type="button"
-                  className={`btn btn-link text-decoration-none fw-semibold px-3 py-2 ${
-                    effectiveWeek === 'during' ? 'text-body' : 'text-muted'
-                  }`}
-                  onClick={() => setSelectedWeek('during')}
-                >
-                  During module
-                </button>
+            <Card.Header className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between p-0 border-0 border-bottom border-light-subtle">
+              <div>
+                <div className="d-flex align-items-center">
+                  <button
+                    type="button"
+                    className={`btn btn-link text-decoration-none fw-semibold px-3 py-2 ${
+                      effectiveWeek === 'this' ? 'text-body' : 'text-muted'
+                    }`}
+                    onClick={() => setSelectedWeek('this')}
+                  >
+                    This week
+                  </button>
+                  <div
+                    className="border-start border-secondary"
+                    style={{ height: '1.5rem' }}
+                  />
+                  <button
+                    type="button"
+                    className={`btn btn-link text-decoration-none fw-semibold px-3 py-2 ${
+                      effectiveWeek === 'next' ? 'text-body' : 'text-muted'
+                    }`}
+                    onClick={() => setSelectedWeek('next')}
+                  >
+                    Next week
+                  </button>
+                  <div
+                    className="border-start border-secondary"
+                    style={{ height: '1.5rem' }}
+                  />
+                  <button
+                    type="button"
+                    className={`btn btn-link text-decoration-none fw-semibold px-3 py-2 ${
+                      effectiveWeek === 'during' ? 'text-body' : 'text-muted'
+                    }`}
+                    onClick={() => setSelectedWeek('during')}
+                  >
+                    During module
+                  </button>
+                </div>
               </div>
 
               <Form.Select
                 size="sm"
-                className="w-auto me-3"
+                className="w-auto m-2 me-3"
                 value={selectedTypeBySection.tab}
                 onChange={(event) =>
                   setSelectedTypeBySection((prev) => ({
@@ -397,7 +399,7 @@ export const ActivitiesView: React.FC = () => {
               </Form.Select>
             </Card.Header>
             <Card.Body>
-              <Row xs={1} md={2} lg={3} className="g-3">
+              <Row xs={1} sm={1} md={1} lg={2} className="g-3">
                 {visibleAllActivities.map((activity) => (
                   <Col key={activity.id}>
                     <Card className="h-100 border shadow-sm">
