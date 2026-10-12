@@ -131,6 +131,7 @@ function ResourceCard({
         >
           <Form.Label className="small text-muted mb-1">Status</Form.Label>
           <Form.Select
+            style={{ maxWidth: '140px', width: '100%' }}
             size="sm"
             value={resource.userProgressStatus}
             disabled={updating}
@@ -295,7 +296,7 @@ function MyResourcesView() {
               </Alert>
             ) : (
               <>
-                <Row xs={1} md={2} className="g-3">
+                <Row xs={1} md={1} lg={2} className="g-3">
                   {visibleResources.map((resource) => (
                     <Col key={resource.id}>
                       <ResourceCard
@@ -365,7 +366,8 @@ function MyResourcesView() {
         renderSection(
           status,
           resources.filter(
-            (resource) => resource.userProgressStatus === status,
+            (resource) =>
+              !resource.isFavorite && resource.userProgressStatus === status,
           ),
           `You have no resources marked ${status === 'CheckLater' ? 'Check later' : status}.`,
         ),
