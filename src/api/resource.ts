@@ -4,6 +4,9 @@ import type {
   Resource,
   CreateResourceRequest,
   UpdateResourceRequest,
+  MyResource,
+  UpdateResourceProgressRequest,
+  ResourceProgressUpdate,
 } from '../types/resource'
 
 async function readJson<T>(res: Response, fallback: string): Promise<T> {
@@ -16,6 +19,22 @@ async function readJson<T>(res: Response, fallback: string): Promise<T> {
 export async function getResourceById(id: number): Promise<Resource> {
   const res = await apiFetch(`/api/resources/${id}`)
   return readJson(res, `Failed to fetch resource: ${res.status}`)
+}
+
+export async function getMyResources(): Promise<MyResource[]> {
+  const res = await apiFetch('/api/resources/mine')
+  return readJson(res, `Failed to fetch your resources: ${res.status}`)
+}
+
+export async function updateResourceProgress(
+  id: number,
+  request: UpdateResourceProgressRequest,
+): Promise<ResourceProgressUpdate> {
+  const res = await apiFetch(`/api/resources/${id}/progress`, {
+    method: 'PATCH',
+    body: JSON.stringify(request),
+  })
+  return readJson(res, 'Could not update resource progress.')
 }
 
 export async function getCourseResources(

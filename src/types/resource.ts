@@ -5,6 +5,9 @@ export interface ImagePoint {
   audioUrl: string
 }
 
+export type UserResourceProgressStatus =
+  'Current' | 'CheckLater' | 'Done' | 'Archived'
+
 export interface Resource {
   id: number
   creatorId: string
@@ -20,6 +23,22 @@ export interface Resource {
   courseId: number | null
   activityId: number | null
   moduleId: number | null
+}
+
+export interface MyResource extends Resource {
+  userProgressStatus: UserResourceProgressStatus
+  isFavorite: boolean
+}
+
+export interface UpdateResourceProgressRequest {
+  userProgressStatus?: UserResourceProgressStatus
+  isFavorite?: boolean
+}
+
+export interface ResourceProgressUpdate {
+  resourceId: number
+  userProgressStatus: UserResourceProgressStatus
+  isFavorite: boolean
 }
 
 export interface CreateResourceRequest {
