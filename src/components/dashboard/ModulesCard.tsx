@@ -10,7 +10,7 @@ interface ModulesCardProps {
   error: string | null
 }
 
-const PAGE_SIZE = 3
+const PAGE_SIZE = 2
 
 const ModulesCard = ({ modules, loading, error }: ModulesCardProps) => {
   const [page, setPage] = useState(1)
@@ -30,7 +30,7 @@ const ModulesCard = ({ modules, loading, error }: ModulesCardProps) => {
         )}
         {!loading && !error && modules.length > 0 && (
           <>
-            <Row xs={1} md={2} lg={3} className="g-3">
+            <Row xs={1} md={2} lg={2} className="g-3">
               {currentModules.map((module) => (
                 <Col key={module.id}>
                   <Card className="h-100 border shadow-sm">

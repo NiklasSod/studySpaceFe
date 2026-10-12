@@ -103,8 +103,8 @@ body.menu-open {
   transform: translateY(-8px) rotate(-45deg);
 }
 
-/* Mobile view (< 576px) */
-@media (max-width: 575.98px) {
+/* Mobile view (< 620px) */
+@media (max-width: 619.98px) {
   .app-navbar-responsive {
     width: 100% !important;
     position: fixed !important;
@@ -172,8 +172,8 @@ body.menu-open {
   }
 }
 
-/* Desktop and tablet (>= 576px) */
-@media (min-width: 576px) {
+/* Desktop and tablet (>= 620px) */
+@media (min-width: 620px) {
   .profile-hero {
     flex-direction: row !important;
     text-align: start !important;
@@ -186,11 +186,11 @@ body.menu-open {
 
   .app-layout {
     flex-direction: row;
-    margin-left: 220px;
+    margin-left: 190px;
   }
 
   .app-navbar-responsive {
-    width: 220px !important;
+    width: 190px !important;
     height: 100vh !important;
     position: fixed !important;
     top: 0;
@@ -221,7 +221,10 @@ body.menu-open {
   color: var(--bs-primary, #0d6efd) !important;
   transition: color 0.15s ease-in-out;
 }
-
+/* Resource detail link in resource lists */
+.resource-detail-link:hover {
+  color: var(--bs-primary, #0d6efd) !important;
+}
 /* Stable navigation link layout to prevent vertical jumping on bold */
 .app-navbar-responsive .nav-link-stable {
   position: relative;

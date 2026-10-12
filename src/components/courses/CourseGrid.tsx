@@ -13,7 +13,7 @@ interface CourseGridProps {
   isMyCourses: boolean
 }
 
-const PAGE_SIZE = 3
+const PAGE_SIZE = 2
 
 const CourseGrid = ({
   courses,
@@ -30,7 +30,7 @@ const CourseGrid = ({
 
   return (
     <>
-      <Row xs={1} md={2} lg={3} className="g-4">
+      <Row xs={1} sm={1} md={1} lg={2} className="g-2">
         {visibleCourses.map((course) => (
           <Col key={course.id}>
             <Card className="h-100 border shadow-sm position-relative">

@@ -10,7 +10,7 @@ interface CoursesCardProps {
   error: string | null
 }
 
-const PAGE_SIZE = 3
+const PAGE_SIZE = 2
 
 const CoursesCard = ({ courses, loading, error }: CoursesCardProps) => {
   const [page, setPage] = useState(1)
@@ -32,7 +32,7 @@ const CoursesCard = ({ courses, loading, error }: CoursesCardProps) => {
         )}
         {!loading && !error && courses.length > 0 && (
           <>
-            <Row xs={1} md={2} lg={3} className="g-3">
+            <Row xs={1} md={2} lg={2} className="g-3">
               {currentCourses.map((course) => (
                 <Col key={course.id}>
                   <Card className="h-100 border shadow-sm">

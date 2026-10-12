@@ -7,7 +7,7 @@ interface BrandLogoProps {
 }
 
 export const BrandLogo = ({
-  size = 32,
+  size = 28,
   iconSize = 18,
   className = '',
 }: BrandLogoProps) => {
