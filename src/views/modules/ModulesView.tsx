@@ -50,7 +50,7 @@ export const ModulesView: React.FC = () => {
 
   if (loading) {
     return (
-      <Container className="py-4 text-center">
+      <Container fluid className="py-4 text-center">
         <Spinner animation="border" role="status" />
       </Container>
     )
@@ -58,14 +58,14 @@ export const ModulesView: React.FC = () => {
 
   if (error) {
     return (
-      <Container className="py-4">
+      <Container fluid className="py-4">
         <Alert variant="danger">{error}</Alert>
       </Container>
     )
   }
 
   return (
-    <Container className="py-4">
+    <Container fluid className="py-4">
       <div className="d-flex align-items-center gap-2 mb-4">
         <DomainIcon type="module" size={28} className="text-primary" />
         <h1 className="h2 mb-0">Modules</h1>

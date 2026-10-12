@@ -198,7 +198,7 @@ export const AssignmentsView: React.FC = () => {
       )
 
   const renderAssignments = (list: Assignment[], className = 'g-4') => (
-    <Row xs={1} md={2} lg={3} className={className}>
+    <Row xs={1} sm={1} md={1} lg={2} className={className}>
       {list.map((assignment) => (
         <Col key={assignment.id}>
           <AssignmentCard

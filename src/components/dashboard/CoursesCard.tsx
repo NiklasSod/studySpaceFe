@@ -32,7 +32,7 @@ const CoursesCard = ({ courses, loading, error }: CoursesCardProps) => {
         )}
         {!loading && !error && courses.length > 0 && (
           <>
-            <Row xs={1} md={2} lg={2} className="g-3">
+            <Row xs={1} sm={1} md={1} lg={2} className="g-3">
               {currentCourses.map((course) => (
                 <Col key={course.id}>
                   <Card className="h-100 border shadow-sm">

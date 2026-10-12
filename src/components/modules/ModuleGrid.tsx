@@ -9,7 +9,7 @@ interface ModuleGridProps {
   onDelete: (module: CourseModule) => void
 }
 
-const PAGE_SIZE = 3
+const PAGE_SIZE = 2
 
 const ModuleGrid = ({ modules, onDelete }: ModuleGridProps) => {
   const [page, setPage] = useState(1)
@@ -18,7 +18,7 @@ const ModuleGrid = ({ modules, onDelete }: ModuleGridProps) => {
 
   return (
     <>
-      <Row xs={1} md={1} lg={2} className="g-4">
+      <Row xs={1} sm={1} md={1} lg={2} className="g-2">
         {visibleModules.map((module) => (
           <Col key={module.id}>
             <ModuleCard module={module} onDelete={onDelete} />
