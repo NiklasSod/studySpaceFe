@@ -76,8 +76,8 @@ function ResourceFormModal({
 
     const name = displayName.trim()
     const link = normalizeUrl(url)
-    if (!name || !link) {
-      setError('Please provide both a name and a valid link.')
+    if (!name) {
+      setError('Please provide a name.')
       return
     }
 
@@ -170,10 +170,9 @@ function ResourceFormModal({
                 color: 'var(--input-text)',
                 borderColor: 'var(--input-border)',
               }}
-              required
             />
             <Form.Text className="text-muted">
-              A URL starting with https:// is recommended.
+              Optional. A URL starting with https:// is recommended.
             </Form.Text>
           </Form.Group>
 

@@ -115,8 +115,8 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
 
   const submitAdd = async () => {
     const link = normalizeUrl(url)
-    if (!name.trim() || !link) {
-      setFormError('Please provide both a name and a valid link.')
+    if (!name.trim()) {
+      setFormError('Please provide a name.')
       return
     }
 
@@ -157,8 +157,8 @@ function ActivityResourcesInline({ activityId }: ActivityResourcesInlineProps) {
   const submitEdit = async () => {
     if (editingId === null) return
     const link = normalizeUrl(editUrl)
-    if (!editName.trim() || !link) {
-      setFormError('Please provide both a name and a valid link.')
+    if (!editName.trim()) {
+      setFormError('Please provide a name.')
       return
     }
 
