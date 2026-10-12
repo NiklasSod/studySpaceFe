@@ -14,3 +14,9 @@ export interface RegisterRequest {
   email: string
   password: string
 }
+
+export interface ResetPasswordRequest {
+  email: string
+  token: string
+  newPassword: string
+}

@@ -1,4 +1,9 @@
-import type { AuthResponse, LoginRequest, RegisterRequest } from '../types/auth'
+import type {
+  AuthResponse,
+  LoginRequest,
+  RegisterRequest,
+  ResetPasswordRequest,
+} from '../types/auth'
 import { parseApiError } from '../utils/apiError'
 
 const ACCESS_TOKEN = 'accessToken'
@@ -187,6 +192,21 @@ export async function requestPasswordReset(email: string): Promise<void> {
     throw new Error(
       await parseApiError(res, 'Could not send password reset email.'),
     )
+  }
+}
+
+export async function resetPassword(
+  request: ResetPasswordRequest,
+): Promise<void> {
+  const res = await fetch('/api/auth/reset-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(request),
+    credentials: 'include',
+  })
+
+  if (!res.ok) {
+    throw new Error(await parseApiError(res, 'Could not reset password.'))
   }
 }
 

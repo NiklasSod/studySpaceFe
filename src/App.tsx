@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { useAuth } from './auth/AuthContext'
 import LoginView from './views/auth/LoginView'
 import CreateAccountView from './views/auth/CreateAccountView'
+import ResetPasswordView from './views/auth/ResetPasswordView'
 import AppLayout from './components/AppLayout'
 import StudentRoutes from './routes/StudentRoutes'
 import TeacherRoutes from './routes/TeacherRoutes'
@@ -24,6 +25,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginView />} />
         <Route path="/register" element={<CreateAccountView />} />
+        <Route path="/reset-password" element={<ResetPasswordView />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     )
