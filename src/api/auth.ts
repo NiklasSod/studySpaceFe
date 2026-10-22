@@ -139,6 +139,7 @@ function storeSession(data: AuthResponse): void {
 function clearSession(): void {
   sessionStorage.removeItem(ACCESS_TOKEN)
   sessionStorage.removeItem(EXPIRES_AT)
+  sessionStorage.removeItem('demoDashboardDismissedNotifications')
 }
 
 export async function register(

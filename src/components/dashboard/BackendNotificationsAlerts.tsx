@@ -8,6 +8,7 @@ interface BackendNotificationsAlertsProps {
   loading: boolean
   role: string | null
   onDismiss: (id: number) => void
+  demo?: boolean
 }
 
 const BackendNotificationsAlerts = ({
@@ -15,6 +16,7 @@ const BackendNotificationsAlerts = ({
   loading,
   role,
   onDismiss,
+  demo = false,
 }: BackendNotificationsAlertsProps) => {
   if (role !== 'student' || loading || notifications.length === 0) {
     return null
@@ -74,7 +76,7 @@ const BackendNotificationsAlerts = ({
                   {item.title || 'Notification'}
                 </Alert.Heading>
                 <p className="mb-1 small">{item.body}</p>
-                {config.linkTo && config.linkText && (
+                {!demo && config.linkTo && config.linkText && (
                   <div>
                     <Link
                       to={config.linkTo}
