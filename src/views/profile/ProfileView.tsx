@@ -81,28 +81,6 @@ const ProfileView = () => {
     setProfileMissing(false)
   }
 
-  const handleFriendshipChanged = async (isFriend: boolean) => {
-    if (!isFriend) {
-      setUserProfile(undefined)
-      setProfileMissing(true)
-      return
-    }
-
-    if (!ownerId) return
-    try {
-      const profile = await getProfile(ownerId)
-      setUserProfile(profile)
-      setProfileMissing(false)
-    } catch (err: unknown) {
-      if (err instanceof ApiError && err.status === 404) {
-        setUserProfile(undefined)
-        setProfileMissing(true)
-      } else {
-        setError(err instanceof Error ? err.message : 'Could not load profile.')
-      }
-    }
-  }
-
   const roleLabel = user?.role
     ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
     : null
@@ -138,7 +116,6 @@ const ProfileView = () => {
             profileUser={user}
             myProfile={myProfile}
             profileMissing={profileMissing}
-            onFriendshipChanged={handleFriendshipChanged}
           />
 
           {profileMissing && myProfile ? (
