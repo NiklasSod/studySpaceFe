@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Alert, Button, ListGroup, Spinner } from 'react-bootstrap'
+import { Alert, Button, Form, ListGroup, Spinner } from 'react-bootstrap'
 import { useAuth } from '../../auth/AuthContext'
 import PaginationControls from '../PaginationControls'
 import {
@@ -34,6 +34,7 @@ type FriendListEntry =
     }
 
 const PAGE_SIZE = 5
+const FRIEND_REQUEST_MESSAGE_MAX_LENGTH = 140
 
 function ProfileFriends({
   profileUser,
@@ -48,6 +49,7 @@ function ProfileFriends({
   const [dataError, setDataError] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
   const [isBusy, setIsBusy] = useState(false)
+  const [requestMessage, setRequestMessage] = useState('')
 
   const navigate = useNavigate()
   const { role } = useAuth()
@@ -139,8 +141,12 @@ function ProfileFriends({
 
   const handleSendRequest = () =>
     runAction(async () => {
-      const request = await sendFriendRequest(profileUser.id)
+      const request = await sendFriendRequest(
+        profileUser.id,
+        requestMessage.trim(),
+      )
       setSentRequests((current) => [...current, request])
+      setRequestMessage('')
     })
 
   const handleAcceptRequest = (request: FriendRequest) =>
@@ -195,17 +201,24 @@ function ProfileFriends({
                   key={`${friend.type}-${friend.userId}`}
                   className="d-flex align-items-center justify-content-between gap-3"
                 >
-                  <Button
-                    variant="link"
-                    className="p-0 text-start text-decoration-none"
-                    onClick={() =>
-                      navigate(`/${role}/profile`, {
-                        state: { currUserId: friend.userId },
-                      })
-                    }
-                  >
-                    {friend.firstName} {friend.lastName}
-                  </Button>
+                  <div>
+                    <Button
+                      variant="link"
+                      className="p-0 text-start text-decoration-none"
+                      onClick={() =>
+                        navigate(`/${role}/profile`, {
+                          state: { currUserId: friend.userId },
+                        })
+                      }
+                    >
+                      {friend.firstName} {friend.lastName}
+                    </Button>
+                    {friend.type === 'received' && friend.request.message && (
+                      <p className="mb-0 small text-body-secondary">
+                        {friend.request.message}
+                      </p>
+                    )}
+                  </div>
                   {friend.type === 'friend' ? (
                     <Button
                       size="sm"
@@ -288,6 +301,26 @@ function ProfileFriends({
           <Alert variant="info">
             This profile cannot be viewed until you become friends.
           </Alert>
+          <Form.Group className="mb-2" controlId="friend-request-message">
+            <Form.Label>
+              Message <span className="text-body-secondary">(optional)</span>
+            </Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={2}
+              maxLength={FRIEND_REQUEST_MESSAGE_MAX_LENGTH}
+              value={requestMessage}
+              onChange={(event) => setRequestMessage(event.target.value)}
+              placeholder="Add a message to your friend request"
+              aria-describedby="friend-request-message-count"
+            />
+            <Form.Text
+              id="friend-request-message-count"
+              className="d-block text-end"
+            >
+              {requestMessage.length}/{FRIEND_REQUEST_MESSAGE_MAX_LENGTH}
+            </Form.Text>
+          </Form.Group>
           <Button onClick={handleSendRequest} disabled={isBusy}>
             {isBusy ? 'Sending…' : 'Send friend request'}
           </Button>

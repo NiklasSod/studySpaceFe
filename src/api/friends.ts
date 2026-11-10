@@ -47,10 +47,11 @@ export async function getSentFriendRequests(): Promise<FriendRequest[]> {
 
 export async function sendFriendRequest(
   userId: string,
+  message?: string,
 ): Promise<FriendRequest> {
   const res = await apiFetch(`/api/friends/requests/${userId}`, {
     method: 'POST',
-    body: JSON.stringify({}),
+    body: JSON.stringify(message ? { message } : {}),
   })
   if (!res.ok) {
     throw new Error(await parseApiError(res, 'Could not send friend request.'))
