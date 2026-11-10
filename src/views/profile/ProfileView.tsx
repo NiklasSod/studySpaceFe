@@ -150,11 +150,13 @@ const ProfileView = () => {
             </Row>
           ) : null}
 
-          <ProfileAccountSettings
-            user={user}
-            onUpdated={setUser}
-            canDeleteSelf={canDeleteSelf}
-          />
+          {myProfile && (
+            <ProfileAccountSettings
+              user={user}
+              onUpdated={setUser}
+              canDeleteSelf={canDeleteSelf}
+            />
+          )}
         </>
       )}
     </Container>
