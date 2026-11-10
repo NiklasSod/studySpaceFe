@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Col, Container, Row } from 'react-bootstrap'
+import { Alert, Col, Container, Row } from 'react-bootstrap'
 import { getCurrentAssignments } from '../../api/assignment'
 import { getMyCourses } from '../../api/course'
 import { getCurrentModules } from '../../api/module'
@@ -20,6 +20,21 @@ import CoursesCard from '../../components/dashboard/CoursesCard'
 import LatestFeedbackCard from '../../components/dashboard/LatestFeedbackCard'
 import ModulesCard from '../../components/dashboard/ModulesCard'
 import { DomainIcon } from '../../components/DomainIcon'
+import {
+  DEMO_NOTIFICATION_STORAGE_KEY,
+  getDemoDashboardData,
+} from './demoDashboard'
+
+function getDismissedDemoNotificationIds() {
+  const storedIds = sessionStorage.getItem(DEMO_NOTIFICATION_STORAGE_KEY)
+  return storedIds
+    ? storedIds
+        .split(',')
+        .filter((id) => id.length > 0)
+        .map(Number)
+        .filter(Number.isFinite)
+    : []
+}
 
 function mapToDeadline(assignment: Assignment): Deadline {
   return {
@@ -102,7 +117,13 @@ function DashboardView() {
   const [deadlines, setDeadlines] = useState<Deadline[]>([])
   const [deadlinesLoading, setDeadlinesLoading] = useState(true)
   const [deadlinesError, setDeadlinesError] = useState<string | null>(null)
-  const [dismissedIds, setDismissedIds] = useState<number[]>([])
+  const [dismissedDeadlineIds, setDismissedDeadlineIds] = useState<number[]>(
+    [],
+  )
+  const [dismissedNotificationIds, setDismissedNotificationIds] = useState<number[]>(
+    getDismissedDemoNotificationIds,
+  )
+  const [isDemoDashboard, setIsDemoDashboard] = useState(false)
 
   // Backend notifications state
   const [notifications, setNotifications] = useState<UserNotification[]>([])
@@ -116,21 +137,44 @@ function DashboardView() {
 
   useEffect(() => {
     getMyCourses()
-      .then(setCourses)
+      .then((data) => {
+        setCourses(data)
+        if (role === 'student' && data.length === 0) {
+          const demo = getDemoDashboardData()
+          const dismissedDemoIds = getDismissedDemoNotificationIds()
+          setCourses(demo.courses)
+          setModules(demo.modules)
+          setDeadlines(demo.deadlines)
+          setFeedbackItems(demo.feedbackItems)
+          setNotifications(
+            demo.notifications.filter(
+              (notification) =>
+                !dismissedDemoIds.includes(notification.id),
+            ),
+          )
+          setIsDemoDashboard(true)
+          setModulesLoading(false)
+          setDeadlinesLoading(false)
+          setFeedbackLoading(false)
+          setNotifLoading(false)
+        }
+      })
       .catch((err: Error) => setError(err.message))
       .finally(() => setLoading(false))
-  }, [])
+  }, [role])
 
   useEffect(() => {
+    if (loading || isDemoDashboard) return
+
     getCurrentModules()
       .then(setModules)
       .catch((err: Error) => setModulesError(err.message))
       .finally(() => setModulesLoading(false))
-  }, [])
+  }, [loading, isDemoDashboard])
 
   // Fetch unread notifications from backend API
   useEffect(() => {
-    if (role !== 'student') return
+    if (role !== 'student' || loading || isDemoDashboard) return
 
     apiFetch('/api/notifications?unreadOnly=true')
       .then(async (res: Response) => {
@@ -140,10 +184,25 @@ function DashboardView() {
       })
       .catch(() => {})
       .finally(() => setNotifLoading(false))
-  }, [role])
+  }, [role, loading, isDemoDashboard])
 
   // Handle notification dismissal via backend API
   const handleDismissNotification = async (userNotificationId: number) => {
+    if (isDemoDashboard) {
+      const dismissed = [
+        ...new Set([...dismissedNotificationIds, userNotificationId]),
+      ]
+      sessionStorage.setItem(
+        DEMO_NOTIFICATION_STORAGE_KEY,
+        dismissed.join(','),
+      )
+      setDismissedNotificationIds(dismissed)
+      setNotifications((prev) =>
+        prev.filter((notification) => notification.id !== userNotificationId),
+      )
+      return
+    }
+
     try {
       const res = await apiFetch(
         `/api/notifications/${userNotificationId}/seen`,
@@ -162,22 +221,22 @@ function DashboardView() {
   }
 
   useEffect(() => {
-    if (role !== 'student') return
+    if (role !== 'student' || loading || isDemoDashboard) return
 
     getCurrentAssignments()
       .then((data) => setDeadlines(data.map(mapToDeadline)))
       .catch((err: Error) => setDeadlinesError(err.message))
       .finally(() => setDeadlinesLoading(false))
-  }, [role])
+  }, [role, loading, isDemoDashboard])
 
   useEffect(() => {
-    if (role !== 'student') return
+    if (role !== 'student' || loading || isDemoDashboard) return
 
     getMySubmissions()
       .then((data) => setFeedbackItems(buildFeedbackItems(data, deadlines)))
       .catch((err: Error) => setFeedbackError(err.message))
       .finally(() => setFeedbackLoading(false))
-  }, [role, deadlines])
+  }, [role, deadlines, loading, isDemoDashboard])
 
   if (role === null) return
 
@@ -185,7 +244,8 @@ function DashboardView() {
     (deadline) => deadline.status !== 'approved',
   )
   const atRiskDeadlines = visibleDeadlines.filter(
-    (deadline) => isAtRisk(deadline) && !dismissedIds.includes(deadline.id),
+    (deadline) =>
+      isAtRisk(deadline) && !dismissedDeadlineIds.includes(deadline.id),
   )
 
   return (
@@ -197,12 +257,24 @@ function DashboardView() {
         </h1>
       </div>
 
+      {isDemoDashboard && (
+        <Alert variant="info" className="mb-4">
+          <strong>Demo dashboard</strong>
+          <span className="ms-2">
+            This preview shows sample course activity and is not connected to
+            your account.
+          </span>
+        </Alert>
+      )}
+
       <Row className="g-4 align-items-start">
         <Col lg={8}>
           {/* High priority: Time-critical at-risk deadlines */}
           <AtRiskAlerts
             deadlines={atRiskDeadlines}
-            onDismiss={(id) => setDismissedIds((prev) => [...prev, id])}
+            onDismiss={(id) =>
+              setDismissedDeadlineIds((prev) => [...prev, id])
+            }
           />
 
           {/* Secondary priority: Backend-driven general notifications */}
@@ -211,6 +283,7 @@ function DashboardView() {
             loading={notifLoading}
             role={role}
             onDismiss={handleDismissNotification}
+            demo={isDemoDashboard}
           />
 
           <CoursesCard courses={courses} loading={loading} error={error} />

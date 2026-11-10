@@ -1,19 +1,9 @@
 import { useEffect, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import {
-  Alert,
-  Button,
-  Col,
-  Collapse,
-  Container,
-  Form,
-  Row,
-  Spinner,
-} from 'react-bootstrap'
-import { ChevronDown } from 'react-bootstrap-icons'
+import { useLocation } from 'react-router-dom'
+import { Alert, Col, Container, Form, Row, Spinner } from 'react-bootstrap'
 import { useAuth } from '../../auth/AuthContext'
 import { useEditMode } from '../../editMode/EditModeContext'
-import { deleteAccount, getUser } from '../../api/user'
+import { getUser } from '../../api/user'
 import type { UserDto } from '../../api/user'
 import { getProfile } from '../../api/userProfile'
 import type { ProfileRequest } from '../../types/userProfile'
@@ -22,9 +12,8 @@ import ProfileHeader from '../../components/profile/ProfileHeader'
 import ProfileAbout from '../../components/profile/ProfileAbout'
 import ProfileSkills from '../../components/profile/ProfileSkills'
 import ProfileDetails from '../../components/profile/ProfileDetails'
-import ConfirmModal from '../../components/ConfirmModal'
-import EditAccountForm from '../../components/profile/EditAccountForm'
-import ChangePasswordForm from '../../components/profile/ChangePasswordForm'
+import ProfileFriends from '../../components/profile/ProfileFriends'
+import ProfileAccountSettings from '../../components/profile/ProfileAccountSettings'
 import CreateProfileForm from '../../components/profile/CreateProfileForm'
 
 const ProfileView = () => {
@@ -33,25 +22,17 @@ const ProfileView = () => {
   const [profileMissing, setProfileMissing] = useState(false)
   const [loadedOwnerId, setLoadedOwnerId] = useState<string>()
   const [error, setError] = useState<string | null>(null)
-  const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
-  const [deleteError, setDeleteError] = useState<string | null>(null)
-  const [showEditSection, setShowEditSection] = useState(false)
-  const [showPasswordSection, setShowPasswordSection] = useState(false)
-  const [showDeleteSection, setShowDeleteSection] = useState(false)
 
   const location = useLocation()
-  const navigate = useNavigate()
   const currUserId = location.state?.currUserId as string | undefined
 
-  const { userId, role, logout } = useAuth()
+  const { userId, role } = useAuth()
   const { editMode, setEditMode } = useEditMode()
-  const isTeacher = role !== 'student'
   const myProfile = !currUserId || currUserId === userId
   const canDeleteSelf = myProfile && role?.toLowerCase() !== 'admin'
-
   const ownerId = currUserId ?? userId
   const loading = !ownerId || loadedOwnerId !== ownerId
+  const isTeacher = role !== 'student'
 
   useEffect(() => {
     if (!ownerId) return
@@ -62,7 +43,6 @@ const ProfileView = () => {
         if (cancelled) return
 
         setError(null)
-
         if (userResult.status === 'fulfilled') {
           setUser(userResult.value)
         } else {
@@ -78,6 +58,7 @@ const ProfileView = () => {
         } else {
           const err = profileResult.reason
           if (err instanceof ApiError && err.status === 404) {
+            setUserProfile(undefined)
             setProfileMissing(true)
           } else {
             setError(
@@ -95,6 +76,11 @@ const ProfileView = () => {
     }
   }, [ownerId])
 
+  const handleProfileCreated = (profile: ProfileRequest) => {
+    setUserProfile(profile)
+    setProfileMissing(false)
+  }
+
   const roleLabel = user?.role
     ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
     : null
@@ -102,26 +88,6 @@ const ProfileView = () => {
   const skills = userProfile?.skills?.filter((skill) => skill.trim()) ?? []
   const whatsAppNumber = userProfile?.whatsAppNumber?.trim()
   const gitHubLink = userProfile?.gitHubLink?.trim()
-
-  const handleProfileCreated = (profile: ProfileRequest) => {
-    setUserProfile(profile)
-    setProfileMissing(false)
-  }
-
-  const handleDeleteAccount = async () => {
-    try {
-      setIsDeleting(true)
-      setDeleteError(null)
-      await deleteAccount()
-      await logout()
-      navigate('/login', { replace: true })
-    } catch (err: unknown) {
-      setDeleteError(
-        err instanceof Error ? err.message : 'Could not delete your account.',
-      )
-      setIsDeleting(false)
-    }
-  }
 
   return (
     <Container className="py-4">
@@ -145,13 +111,16 @@ const ProfileView = () => {
             myProfile={myProfile}
           />
 
+          <ProfileFriends
+            key={user.id}
+            profileUser={user}
+            myProfile={myProfile}
+            profileMissing={profileMissing}
+          />
+
           {profileMissing && myProfile ? (
             <CreateProfileForm onCreated={handleProfileCreated} />
-          ) : profileMissing ? (
-            <Alert variant="info">
-              This user hasn&apos;t set up their profile yet.
-            </Alert>
-          ) : (
+          ) : !profileMissing ? (
             <Row className="g-5">
               <Col lg={7}>
                 <div className="mb-5">
@@ -179,156 +148,17 @@ const ProfileView = () => {
                 />
               </Col>
             </Row>
-          )}
+          ) : null}
 
-          {canDeleteSelf && (
-            <>
-              <hr className="my-4" style={{ maxWidth: '400px' }} />
-              <section
-                className="d-flex flex-column"
-                style={{ maxWidth: '400px' }}
-              >
-                <div>
-                  <Button
-                    type="button"
-                    variant="link"
-                    onClick={() => setShowEditSection((open) => !open)}
-                    aria-expanded={showEditSection}
-                    aria-controls="edit-account-collapse"
-                    className="d-flex align-items-center justify-content-between w-100 p-0 border-0 text-decoration-none pb-4"
-                    style={{ color: 'var(--text-primary)' }}
-                  >
-                    <span className="h5 fw-semibold mb-0">Edit profile</span>
-                    <ChevronDown
-                      aria-hidden="true"
-                      size={20}
-                      className="text-body-secondary"
-                      style={{
-                        transform: showEditSection
-                          ? 'rotate(180deg)'
-                          : 'rotate(0deg)',
-                        transition: 'transform 0.2s ease',
-                        flexShrink: 0,
-                      }}
-                    />
-                  </Button>
-                  <Collapse in={showEditSection}>
-                    <div id="edit-account-collapse" className="pt-3 pb-4">
-                      <p className="text-body-secondary mb-3">
-                        Update your first name, last name and / or email
-                        address.
-                      </p>
-                      <EditAccountForm
-                        key={user.id}
-                        user={user}
-                        onUpdated={setUser}
-                      />
-                    </div>
-                  </Collapse>
-                </div>
-
-                <div className="border-top pt-4" style={{ maxWidth: '400px' }}>
-                  <Button
-                    type="button"
-                    variant="link"
-                    onClick={() => setShowPasswordSection((open) => !open)}
-                    aria-expanded={showPasswordSection}
-                    aria-controls="change-password-collapse"
-                    className="d-flex align-items-center justify-content-between w-100 p-0 border-0 text-decoration-none pb-4"
-                    style={{ color: 'var(--text-primary)' }}
-                  >
-                    <span className="h5 fw-semibold mb-0">Change password</span>
-                    <ChevronDown
-                      aria-hidden="true"
-                      size={20}
-                      className="text-body-secondary"
-                      style={{
-                        transform: showPasswordSection
-                          ? 'rotate(180deg)'
-                          : 'rotate(0deg)',
-                        transition: 'transform 0.2s ease',
-                        flexShrink: 0,
-                      }}
-                    />
-                  </Button>
-                  <Collapse in={showPasswordSection}>
-                    <div id="change-password-collapse" className="pt-3 pb-4">
-                      <p className="text-body-secondary mb-3">
-                        Set a new password for your account.
-                      </p>
-                      <ChangePasswordForm />
-                    </div>
-                  </Collapse>
-                </div>
-
-                <div className="border-top pt-4" style={{ maxWidth: '400px' }}>
-                  <Button
-                    type="button"
-                    variant="link"
-                    onClick={() => setShowDeleteSection((open) => !open)}
-                    aria-expanded={showDeleteSection}
-                    aria-controls="delete-account-collapse"
-                    className="d-flex align-items-center justify-content-between w-100 p-0 border-0 text-decoration-none"
-                    style={{ color: 'var(--text-primary)' }}
-                  >
-                    <span className="h5 fw-semibold mb-0 text-danger">
-                      Delete profile
-                    </span>
-                    <ChevronDown
-                      aria-hidden="true"
-                      size={20}
-                      className="text-danger"
-                      style={{
-                        transform: showDeleteSection
-                          ? 'rotate(180deg)'
-                          : 'rotate(0deg)',
-                        transition: 'transform 0.2s ease',
-                        flexShrink: 0,
-                      }}
-                    />
-                  </Button>
-                  <Collapse in={showDeleteSection}>
-                    <div id="delete-account-collapse" className="pt-3">
-                      <p className="text-body-secondary mb-3">
-                        Permanently delete your account, your profile and all of
-                        your data.
-                        <br /> This action cannot be undone.
-                      </p>
-                      <Button
-                        variant="outline-danger"
-                        size="sm"
-                        style={{ maxWidth: '150px' }}
-                        onClick={() => setShowDeleteModal(true)}
-                      >
-                        Delete account
-                      </Button>
-                    </div>
-                  </Collapse>
-                </div>
-              </section>
-            </>
+          {myProfile && (
+            <ProfileAccountSettings
+              user={user}
+              onUpdated={setUser}
+              canDeleteSelf={canDeleteSelf}
+            />
           )}
         </>
       )}
-
-      <ConfirmModal
-        show={showDeleteModal}
-        title="Delete account"
-        confirmLabel="Delete account"
-        busyLabel="Deleting..."
-        variant="danger"
-        isBusy={isDeleting}
-        error={deleteError}
-        onConfirm={handleDeleteAccount}
-        onCancel={() => setShowDeleteModal(false)}
-        message={
-          <>
-            Are you sure you want to permanently delete your account? This will
-            remove your profile and all of your data. This action cannot be
-            undone.
-          </>
-        }
-      />
     </Container>
   )
 }
